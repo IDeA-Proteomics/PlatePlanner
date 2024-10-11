@@ -139,9 +139,9 @@ class Plate(object):
 
 
 
-    def outputToFile(self):
+    def outputToFile(self, filename):
 
-        with open("out.plate", 'w') as file:
+        with open(filename, 'w') as file:
 
             writer = csv.writer(file)
 
@@ -159,12 +159,12 @@ class Plate(object):
 
         return
     
-    def loadFromFile(self):
+    def loadFromFile(self, filename):
 
         projects = {}
         used = []
         idx = 0
-        with open("out.plate", 'r') as file:
+        with open(filename, 'r') as file:
             reader = csv.reader(file)
             for line in list(reader)[1:]:
                 well_index = int(line[0])

@@ -4,7 +4,7 @@ import PlateImage
 import Popups
 from Popups import LabeledEntry
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
 from PlateModel import Sample, Project, Plate, position_string_list
 from PlateExceptions import *
 
@@ -14,10 +14,10 @@ color_list = ['red', 'orange', 'yellow', 'green', 'purple', 'cyan', 'magenta', '
 
 class PlateApp(tk.Frame):
 
-    def __init__(self, parent):
+    def __init__(self, root):
 
-        self.parent = parent
-        tk.Frame.__init__(self, self.parent)
+        self.root_window = root
+        tk.Frame.__init__(self, self.root_window)
 
         self.plate = Plate([])
         self.selected_positions = []
@@ -44,7 +44,7 @@ class PlateApp(tk.Frame):
         self.proj_list_frame = tk.Frame(self.proj_frame)
         self.proj_list_frame.pack(side=tk.TOP)
 
-        self.save_button = tk.Button(self.proj_frame, text="Save", command=self.plate.outputToFile)
+        self.save_button = tk.Button(self.proj_frame, text="Save", command=self.onSave)
         self.save_button.pack(side=tk.TOP)
 
         self.load_button = tk.Button(self.proj_frame, text="Load", command=self.loadFromFile)
@@ -52,15 +52,22 @@ class PlateApp(tk.Frame):
 
         return
     
+    def onSave(self):
+        filename = filedialog.asksaveasfilename(parent=self.root_window, title="Save Plate File", defaultextension='.plate', filetypes=(("Plate File", "*.plate"),("All Files", "*.*")))
+        if filename:
+            self.plate.outputToFile(filename)
+    
     def loadFromFile(self):
-        try:
-            self.plate.loadFromFile()
-        except DuplicateEntryException:
-            messagebox.showerror("Error", "Plate file has duplicate entries")
-        except MissingEntryException:
-            messagebox.showerror("Error", "Plate file has missing entries")
-        self.redrawList()
-        self.plate_image.redrawSamples()
+        filename = filedialog.askopenfilename(parent=self.root_window, title="Open Plate File", filetypes=(("Plate File", "*.plate"),("All Files", "*.*")))
+        if filename:
+            try:
+                self.plate.loadFromFile(filename)
+            except DuplicateEntryException:
+                messagebox.showerror("Error", "Plate file has duplicate entries")
+            except MissingEntryException:
+                messagebox.showerror("Error", "Plate file has missing entries")
+            self.redrawList()
+            self.plate_image.redrawSamples()
 
         return
     
@@ -106,7 +113,7 @@ class PlateApp(tk.Frame):
     
     def askNewProject(self):
         colors = [color for color in color_list if color not in [proj.color for proj in self.plate.project_list]]
-        asker = Popups.AskNewProject(self.parent, self.plate.getFreeWells(), colors, self.selected_positions)
+        asker = Popups.AskNewProject(self.root_window, self.plate.getFreeWells(), colors, self.selected_positions)
         self.plate_image.clearSelection()
         self.selectionChangeListeners.append(asker.onSelectionChange)
         self.wait_window(asker)
