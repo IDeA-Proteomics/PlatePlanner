@@ -19,6 +19,8 @@ class PlateApp(tk.Frame):
         self.root_window = root
         tk.Frame.__init__(self, self.root_window)
 
+        self.root_window.report_callback_exception = self.exceptionHandler
+
         self.plate = Plate([])
         self.selected_positions = []
         self.selectionChangeListeners = []
@@ -125,6 +127,15 @@ class PlateApp(tk.Frame):
 
         return rv
     
+
+    def exceptionHandler(self, etype, evalue, etrace):
+
+        Popups.ExceptionDialog(title='Unhandled Exception', 
+                               message='An Unhandled Exception was caught by PlateApp!\n\nPress OK to close.\n', 
+                               detail=f'type:{etype}\nvalue:{evalue}')
+        self.root_window.destroy()
+
+        return
 
 def main():
 

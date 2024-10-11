@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from PlateModel import position_string_list, Position
 
 class LabeledEntry(tk.Frame):
@@ -87,10 +87,7 @@ class AskNewProject(tk.Toplevel):
         self.start_selection = self.position_list[0] if not self.selection or self.selection[0].label not in self.position_list else self.selection[0].label
         self.start_position_var.set(self.start_selection)
 
-
-
-        self.number_entry.set(str(len(self.selection)))
-        
+        self.number_entry.set(str(len(self.selection)))        
 
         return
 
@@ -103,3 +100,13 @@ class AskNewProject(tk.Toplevel):
         self.position = Position.from_string(self.start_position_var.get())
         self.color = self.color_var.get()
         self.destroy()
+
+
+class ExceptionDialog():
+
+    def __init__(self, title='Error', message='', detail=''):
+
+        messagebox.showerror(title=title, message=message, detail=detail)
+
+        return
+    

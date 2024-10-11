@@ -124,18 +124,6 @@ class Plate(object):
 
         used = [pos.index for pos in self.getUsedWells()]
         return [Position.from_index(i) for i in range(95) if i not in used]
-    
-    # def checkPlate(self):
-    #     seen = set()
-    #     duplicates = []
-    #     for i in [sample.position.index for project in self.project_list for sample in project]:
-    #         if i not in seen:
-    #             seen.add(i)
-    #         elif i not in duplicates:
-    #             duplicates.append(i)
-
-    #     if len(duplicates):
-    #         raise WellNotFreeException(Position.from_index(duplicates[0]))
 
 
 
