@@ -1,8 +1,10 @@
 
 import csv
 from PlateExceptions import *
-
+### Horizontal plates
 # position_string_list = [f'{c}{i+1}' for c in 'ABCDEFGH' for i in range(12)]
+
+### Vertical plates
 position_string_list = [f'{c}{i+1}' for i in range(12) for c in 'ABCDEFGH']
 
 class Position(object):
@@ -143,6 +145,9 @@ class Plate(object):
                     writer.writerow([idx, Position.from_index(idx).label, 'EMPTY', 'EMPTY'])
                     idx += 1
                 writer.writerow([sample.position.index, sample.position.label, sample.project.name, sample.name])
+                idx += 1
+            while idx < 96:
+                writer.writerow([idx, Position.from_index(idx).label, 'EMPTY', 'EMPTY'])
                 idx += 1
 
         return

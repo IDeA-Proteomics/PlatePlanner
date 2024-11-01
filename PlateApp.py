@@ -7,6 +7,9 @@ import tkinter as tk
 from tkinter import messagebox, filedialog
 from PlateModel import Sample, Project, Plate, position_string_list
 from PlateExceptions import *
+from PIL import ImageGrab
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
 
 
 color_list = ['red', 'orange', 'yellow', 'green', 'purple', 'cyan', 'magenta', 'brown']
@@ -51,6 +54,39 @@ class PlateApp(tk.Frame):
 
         self.load_button = tk.Button(self.proj_frame, text="Load", command=self.loadFromFile)
         self.load_button.pack(side=tk.TOP)
+
+        self.pdf_button = tk.Button(self.proj_frame, text="PDF", command=self.saveImage)
+        self.pdf_button.pack(side=tk.TOP)
+
+        return
+
+    def saveImage(self):
+
+        ### Window coords for the screen grab
+        x = self.root_window.winfo_rootx() + self.plate_image.canvas.winfo_x()
+        y = self.root_window.winfo_rooty() + self.plate_image.canvas.winfo_y()
+        x1 = x + self.plate_image.canvas.winfo_width()
+        y1 = y + self.plate_image.canvas.winfo_height()
+
+        ImageGrab.grab(bbox=(x, y, x1, y1)).save("temp.png")
+
+        ### coords for image on PDF
+        image_height = A4[0] / self.plate_image.canvas.winfo_width() * self.plate_image.canvas.winfo_height()
+
+        c = canvas.Canvas('output.pdf', pagesize=A4)
+        c.setFont("Helvetica", 30)
+        c.setFillColor('red')
+        image_bottom = A4[1] - image_height - 50
+        x2, y2 = c.drawImage("temp.png", 0, image_bottom, width=A4[0], preserveAspectRatio=True)
+
+        label_y = image_bottom
+
+        for proj in self.plate.project_list:
+            label_y -= 40
+            c.setFillColor(proj.color)
+            c.drawString(10, label_y, proj.name)
+        c.save()
+
 
         return
     
@@ -154,7 +190,7 @@ def main():
 if (__name__ == '__main__'):
 
 
-    print (position_string_list)
+    # print (position_string_list)
 
     main()
 
