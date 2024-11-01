@@ -101,8 +101,9 @@ class Plate(OrderedDict):
         return [sample for sample in self.data.values()]
 
     def addProject(self, project, start_pos):
-        wells = position_string_list[position_string_list.index(start_pos.label):position_string_list.index(start_pos.label) + project.num]
-        if all((self.data[well] == None for well in wells)):
+        start = position_string_list.index(start_pos.label)
+        wells = position_string_list[start:start + project.num]
+        if all((self.data[well] == None for well in wells)) and start + project.num < 97:
             self.projects.append(project)
             for well, sample in list(zip(wells, project.samples)):
                 self.data[well] = sample
