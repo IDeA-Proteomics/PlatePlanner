@@ -117,7 +117,6 @@ class Plate(OrderedDict):
             writer = csv.writer(file)
             
             row = ['Index', 'Position', 'Project', 'Sample']
-            print(row)
             writer.writerow(row)
             idx = 0
             for (well, sample) in self.data.items():
@@ -127,7 +126,6 @@ class Plate(OrderedDict):
                     sample.project.name if sample is not None else 'EMPTY',
                     sample.name if sample is not None else 'EMPTY'
                 ]
-                print(row)
                 writer.writerow(row)
                 idx += 1
         return
