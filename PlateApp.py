@@ -22,7 +22,7 @@ class PlateApp(tk.Frame):
         self.root_window = root
         tk.Frame.__init__(self, self.root_window)
 
-        # self.root_window.report_callback_exception = self.exceptionHandler
+        self.root_window.report_callback_exception = self.exceptionHandler
 
         self.plate = Plate()
         self.selected_positions = []

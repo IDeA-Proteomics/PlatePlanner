@@ -30,13 +30,6 @@ class Well(tk.Canvas):
     def _draw(self):
         self.config(bg='magenta' if self.selected else 'white')
         fill = 'blue' if self.plate[self.position] is None else self.plate[self.position].project.color
-    
-        # if self.sample is None:
-        #     fill = 'blue'
-        #     print(f'well {self.getLabelString()} is empty')
-        # else:
-        #     fill = self.sample.project.color
-        #     print(f'filling {fill}')
 
         self.well = self.create_oval(self.w/2 - self.radius, self.h/2 - self.radius, self.w/2 + self.radius, self.h/2 + self.radius, fill=fill)
         self.create_text(self.w / 2, self.h / 2, text=self.position.label)
@@ -57,15 +50,6 @@ class Well(tk.Canvas):
         self.selected = selected
         self.redraw()
         return
-    
-    # def assignSample(self, sample : Sample):
-    #     # print(f'Assigning {self.position.label} to sample {sample.name}')
-    #     self.sample = sample
-    #     self.redraw()
-    #     return
-    
-    # def hasSample(self):
-    #     return self.sample is not None
 
 
 class PlateWidget(tk.Frame):
@@ -190,45 +174,3 @@ class PlateWidget(tk.Frame):
                 self.onSelectionChange([well.position for well in self.wells if well.selected])
 
         return
-    
-    # def getFreeWells(self, num=0):
-
-    #     if num > 0:
-    #         rv = []
-    #         slot_start = 0
-    #         for well in self.wells:
-    #             if well.sample is not None:
-    #                 slot_start = well.position.index + 1
-    #                 continue
-    #             else:
-    #                 while (well.position.index - slot_start + 1) >= num:
-    #                     rv.append(position_string_list[slot_start])
-    #                     slot_start += 1
-    #     else:
-    #         rv = [well.position.label for well in self.wells if well.sample is None] 
-
-    #     return rv
-
-
-
-
-    
-
-
-def main():
-
-    root = tk.Tk()
-
-    image = PlateWidget(root, 10, 10, 600)
-    image.pack()
-
-    root.mainloop()
-
-    return
-
-
-
-
-if (__name__ == '__main__'):
-
-    main()
