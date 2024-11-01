@@ -8,16 +8,17 @@ from PlateModel import Sample, Project, Position, position_string_list
 ###
 ###
 class Well(tk.Canvas):
-    def __init__(self, parent, position, w, h):
+    def __init__(self, parent, plate, position, w, h):
         self.parent = parent
         tk.Canvas.__init__(self, self.parent, width=w, height=h, bg='white')
+
+        self.plate = plate
 
         self.position = position
         self.w = w
         self.h = h
         self.radius = math.floor(min(self.h, self.w) * 0.45)
         self.selected = False
-        self.sample = None
 
         self._draw()
 
@@ -28,7 +29,7 @@ class Well(tk.Canvas):
     
     def _draw(self):
         self.config(bg='magenta' if self.selected else 'white')
-        fill = 'blue' if self.sample is None else self.sample.project.color
+        fill = 'blue' if self.plate[self.position] is None else self.plate[self.position].project.color
     
         # if self.sample is None:
         #     fill = 'blue'
@@ -57,14 +58,14 @@ class Well(tk.Canvas):
         self.redraw()
         return
     
-    def assignSample(self, sample : Sample):
-        # print(f'Assigning {self.position.label} to sample {sample.name}')
-        self.sample = sample
-        self.redraw()
-        return
+    # def assignSample(self, sample : Sample):
+    #     # print(f'Assigning {self.position.label} to sample {sample.name}')
+    #     self.sample = sample
+    #     self.redraw()
+    #     return
     
-    def hasSample(self):
-        return self.sample is not None
+    # def hasSample(self):
+    #     return self.sample is not None
 
 
 class PlateWidget(tk.Frame):
@@ -114,7 +115,7 @@ class PlateWidget(tk.Frame):
         ### For Vertical plates
         for j in range(12):
             for i in range(8):
-                well = Well(self, Position.from_rowcol(i, j), self.well_size, self.well_size)
+                well = Well(self, self.plate, Position.from_rowcol(i, j), self.well_size, self.well_size)
                 self.wells.append(well)
                 xpos = self.start_x + (j * self.well_size)
                 ypos = self.start_y + (i * self.well_size)
@@ -136,23 +137,16 @@ class PlateWidget(tk.Frame):
     
     def redrawSamples(self):
 
-        for sample in self.plate.getSamples():
-            self.wells[sample.position.index].assignSample(sample)
+        for well in self.wells:
+            well.redraw()
 
         return
-    
-    # def getWell(self, row, col):
-    #     return self.wells[(row * 12) + col]
     
     def getWellXY(self, x, y):
         row = math.floor((y - self.start_y) / self.well_size)
         col = math.floor((x - self.start_x) / self.well_size)
         return self.wells[Position.from_rowcol(row, col).index]
     
-    # def getFirstSelected(self):
-    #     if self.selection_start is not None:
-    #         return self.selection_start.position
-    #     return None
 
     def clearSelection(self):
         self.selection_start = None
@@ -197,23 +191,23 @@ class PlateWidget(tk.Frame):
 
         return
     
-    def getFreeWells(self, num=0):
+    # def getFreeWells(self, num=0):
 
-        if num > 0:
-            rv = []
-            slot_start = 0
-            for well in self.wells:
-                if well.sample is not None:
-                    slot_start = well.position.index + 1
-                    continue
-                else:
-                    while (well.position.index - slot_start + 1) >= num:
-                        rv.append(position_string_list[slot_start])
-                        slot_start += 1
-        else:
-            rv = [well.position.label for well in self.wells if well.sample is None] 
+    #     if num > 0:
+    #         rv = []
+    #         slot_start = 0
+    #         for well in self.wells:
+    #             if well.sample is not None:
+    #                 slot_start = well.position.index + 1
+    #                 continue
+    #             else:
+    #                 while (well.position.index - slot_start + 1) >= num:
+    #                     rv.append(position_string_list[slot_start])
+    #                     slot_start += 1
+    #     else:
+    #         rv = [well.position.label for well in self.wells if well.sample is None] 
 
-        return rv
+    #     return rv
 
 
 

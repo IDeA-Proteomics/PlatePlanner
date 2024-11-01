@@ -22,9 +22,9 @@ class PlateApp(tk.Frame):
         self.root_window = root
         tk.Frame.__init__(self, self.root_window)
 
-        self.root_window.report_callback_exception = self.exceptionHandler
+        # self.root_window.report_callback_exception = self.exceptionHandler
 
-        self.plate = Plate([])
+        self.plate = Plate()
         self.selected_positions = []
         self.selectionChangeListeners = []
 
@@ -81,7 +81,7 @@ class PlateApp(tk.Frame):
 
         label_y = image_bottom
 
-        for proj in self.plate.project_list:
+        for proj in self.plate.projects:
             label_y -= 40
             c.setFillColor(proj.color)
             c.drawString(10, label_y, proj.name)
@@ -130,9 +130,9 @@ class PlateApp(tk.Frame):
 
     def onAdd(self):
         try:
-            proj = self.askNewProject()
+            proj, pos = self.askNewProject()
             if proj:
-                self.plate.addProject(proj)
+                self.plate.addProject(proj, pos)
         except (WellNotFreeException, NotEnoughWellsException):
             messagebox.showerror("Error", "Project will not fit!")
 
@@ -143,23 +143,23 @@ class PlateApp(tk.Frame):
     def redrawList(self):
         for widget in self.proj_list_frame.winfo_children():
             widget.destroy()
-        for proj in self.plate.project_list:
+        for proj in self.plate.projects:
             label = self.createProjectLabel(self.proj_list_frame, proj)
             label.pack(side=tk.TOP)
         
         return
     
     def askNewProject(self):
-        colors = [color for color in color_list if color not in [proj.color for proj in self.plate.project_list]]
+        colors = [color for color in color_list if color not in [proj.color for proj in self.plate.projects]]
         asker = Popups.AskNewProject(self.root_window, self.plate.getFreeWells(), colors, self.selected_positions)
         self.plate_image.clearSelection()
         self.selectionChangeListeners.append(asker.onSelectionChange)
         self.wait_window(asker)
         self.selectionChangeListeners.remove(asker.onSelectionChange)
         if asker.name and asker.number:
-            rv = Project(name=asker.name, start_position=asker.position, num_samples=asker.number, color=asker.color)
+            rv = (Project(name=asker.name, num_samples=asker.number, color=asker.color), asker.position)
         else:
-            rv = None
+            rv = (None, None)
 
         return rv
     
