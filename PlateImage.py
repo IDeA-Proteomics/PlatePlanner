@@ -8,7 +8,7 @@ from PlateModel import Sample, Project, Position, position_string_list
 ###
 ###
 class Well(tk.Canvas):
-    def __init__(self, parent, plate, position, w, h):
+    def __init__(self, parent, plate, position, w, h, onPressHandler, onReleaseHandler, onMoveHandler):
         self.parent = parent
         tk.Canvas.__init__(self, self.parent, width=w, height=h, bg='white')
 
@@ -19,11 +19,15 @@ class Well(tk.Canvas):
         self.h = h
         self.radius = math.floor(min(self.h, self.w) * 0.45)
         self.selected = False
+        self.onPressHandler = onPressHandler
+        self.onReleaseHandler = onReleaseHandler
+        self.onMoveHandler = onMoveHandler
 
         self._draw()
 
         self.bind('<ButtonPress-1>', self.onPress)
         self.bind('<ButtonRelease-1>', self.onRelease)
+        self.bind('<B1-Motion>', self.onMove)
 
         return
     
@@ -41,10 +45,13 @@ class Well(tk.Canvas):
         return
     
     def onPress(self, event):
-        self.parent.onWellPress(self.position)
+        self.onPressHandler(self.position)
 
     def onRelease(self, event):
-        self.parent.onWellRelease(self.position, event)
+        self.onReleaseHandler(self.position, event)
+
+    def onMove(self, event):
+        self.onMoveHandler(self.position, event)
 
     def select(self, selected=True):
         self.selected = selected
@@ -99,7 +106,7 @@ class PlateWidget(tk.Frame):
         ### For Vertical plates
         for j in range(12):
             for i in range(8):
-                well = Well(self, self.plate, Position.from_rowcol(i, j), self.well_size, self.well_size)
+                well = Well(self, self.plate, Position.from_rowcol(i, j), self.well_size, self.well_size, self.onWellPress, self.onWellRelease, self.onMove)
                 self.wells.append(well)
                 xpos = self.start_x + (j * self.well_size)
                 ypos = self.start_y + (i * self.well_size)
@@ -174,3 +181,24 @@ class PlateWidget(tk.Frame):
                 self.onSelectionChange([well.position for well in self.wells if well.selected])
 
         return
+
+    def onMove(self, position, event):
+
+        if self.selection_start is not None and self.selecting:
+            self.selection_end = self.getWellXY(event.x + (position.column * self.well_size) + self.start_x, event.y + (position.row * self.well_size) + self.start_y)
+
+            start_index = self.wells.index(self.selection_start)
+            end_index = self.wells.index(self.selection_end)
+
+            if end_index < start_index:
+                temp = end_index
+                end_index = start_index
+                start_index = temp
+
+            for well in self.wells:
+                if self.wells.index(well) in range(start_index, end_index + 1):
+                    well.select()
+                else:
+                    well.select(False)
+
+
