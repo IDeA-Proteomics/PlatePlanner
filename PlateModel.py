@@ -8,6 +8,8 @@ from collections import OrderedDict
 ### Vertical plates
 # position_string_list = [f'{c}{i+1}' for i in range(12) for c in 'ABCDEFGH']
 
+row_letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
 class Position(object):
 
     def __init__(self, row, col, idx, lab):
@@ -76,7 +78,7 @@ class Plate(OrderedDict):
         super().__init__()
         self.rows = rows
         self.columns = columns
-        self.position_string_list = [f'{c}{i+1}' for i in range(self.columns) for c in 'ABCDEFGH'[:self.rows]]
+        self.position_string_list = [f'{c}{i+1}' for i in range(self.columns) for c in row_letters[:self.rows]]
         self.data = {pos : None for pos in self.position_string_list}
         self.projects = []
         return
@@ -118,7 +120,7 @@ class Plate(OrderedDict):
             raise NotEnoughWellsException
 
     def position_from_index(self, idx):
-        row = "ABCDEFGH".index(self.position_string_list[idx][:1])
+        row = row_letters.index(self.position_string_list[idx][:1])
         col = int(self.position_string_list[idx][1:]) -1
         lab = self.position_string_list[idx]
         return Position(row, col, idx, lab)
@@ -126,7 +128,7 @@ class Plate(OrderedDict):
     def position_from_rowcol(self, row, col):
         row = row
         col = col
-        idx = self.position_string_list.index(f'{"ABCDEFGH"[row]}{col + 1}')
+        idx = self.position_string_list.index(f'{row_letters[row]}{col + 1}')
         lab = self.position_string_list[idx]
         return Position(row, col, idx, lab)
     
