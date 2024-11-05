@@ -102,6 +102,8 @@ class PlateWidget(tk.Frame):
 
         self.start_x = self.x + inset_x
         self.start_y = self.y + inset_y
+        self.end_x = self.start_x + (self.w - (2 * inset_x))
+        self.end_y = self.start_y + (self.h - (2 * inset_y))
 
         ### For Vertical plates
         for j in range(self.plate.columns):
@@ -134,6 +136,14 @@ class PlateWidget(tk.Frame):
         return
     
     def getWellXY(self, x, y):
+        if x < self.start_x:
+            x = self.start_x
+        if x > self.end_x:
+            x = self.end_x
+        if y < self.start_y:
+            y = self.start_y
+        if y > self.end_y:
+            y = self.end_y
         row = math.floor((y - self.start_y) / self.well_size)
         col = math.floor((x - self.start_x) / self.well_size)
         return self.wells[self.plate.position_from_rowcol(row, col).index]
