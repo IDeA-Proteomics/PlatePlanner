@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from PlateModel import position_string_list, Position
+from PlateModel import Position
 
 class LabeledEntry(tk.Frame):
 
@@ -28,11 +28,11 @@ class LabeledEntry(tk.Frame):
 
 class AskNewProject(tk.Toplevel):
 
-    def __init__(self, parent, positions, colors, selection=None):
+    def __init__(self, parent, plate, colors, selection=None):
         self.parent = parent
         tk.Toplevel.__init__(self, self.parent)
 
-        
+        self.plate = plate
         self.name = None
         self.number = None
         # self.start_row = "ABCDEFGH".index(start_position[:1])
@@ -40,7 +40,7 @@ class AskNewProject(tk.Toplevel):
         self.position = None
         self.color = None
 
-        self.position_list = [pos.label for pos in positions]
+        self.position_list = [pos.label for pos in self.plate.getFreeWells()]
         self.selection = selection
         self.start_selection = self.position_list[0] if not selection or selection[0].label not in self.position_list else selection[0].label
 
@@ -94,12 +94,19 @@ class AskNewProject(tk.Toplevel):
     def onOk(self):
         self.name = self.name_entry.get()
         num = self.number_entry.get()
-        self.number = int(num) if num.isnumeric() and int(num) < 97 else 0
+        self.number = int(num) if num.isnumeric() and int(num) < self.plate.number_of_wells else 0
         # self.start_row = "ABCDEFGH".index(start_position[:1])
         # self.start_column = int(start_position[1:])
-        self.position = Position.from_string(self.start_position_var.get())
+        self.position = self.plate.position_from_string(self.start_position_var.get())
         self.color = self.color_var.get()
         self.destroy()
+
+    def updateSelection(self):
+
+
+
+
+        return
 
 
 class ExceptionDialog():

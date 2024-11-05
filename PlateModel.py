@@ -6,7 +6,7 @@ from collections import OrderedDict
 # position_string_list = [f'{c}{i+1}' for c in 'ABCDEFGH' for i in range(12)]
 
 ### Vertical plates
-position_string_list = [f'{c}{i+1}' for i in range(12) for c in 'ABCDEFGH']
+# position_string_list = [f'{c}{i+1}' for i in range(12) for c in 'ABCDEFGH']
 
 class Position(object):
 
@@ -18,25 +18,25 @@ class Position(object):
         self.label = lab
         return
     
-    @classmethod
-    def from_index(cls, idx):
-        row = "ABCDEFGH".index(position_string_list[idx][:1])
-        col = int(position_string_list[idx][1:]) -1
-        lab = position_string_list[idx]
-        return cls(row, col, idx, lab)
+    # @classmethod
+    # def from_index(cls, idx):
+    #     row = "ABCDEFGH".index(position_string_list[idx][:1])
+    #     col = int(position_string_list[idx][1:]) -1
+    #     lab = position_string_list[idx]
+    #     return cls(row, col, idx, lab)
 
-    @classmethod
-    def from_rowcol(cls, row, col):
-        row = row
-        col = col
-        idx = position_string_list.index(f'{"ABCDEFGH"[row]}{col + 1}')
-        lab = position_string_list[idx]
-        return cls(row, col, idx, lab)
+    # @classmethod
+    # def from_rowcol(cls, row, col):
+    #     row = row
+    #     col = col
+    #     idx = position_string_list.index(f'{"ABCDEFGH"[row]}{col + 1}')
+    #     lab = position_string_list[idx]
+    #     return cls(row, col, idx, lab)
     
-    @classmethod
-    def from_string(cls, instr):
-        idx = position_string_list.index(instr)
-        return Position.from_index(idx)
+    # @classmethod
+    # def from_string(cls, instr):
+    #     idx = position_string_list.index(instr)
+    #     return Position.from_index(idx)
     
 
 
@@ -72,11 +72,18 @@ color_list = ['red', 'orange', 'yellow', 'green', 'purple', 'cyan', 'magenta', '
 
 class Plate(OrderedDict):
 
-    def __init__(self):
+    def __init__(self, rows, columns):
         super().__init__()
-        self.data = {pos : None for pos in position_string_list}
+        self.rows = rows
+        self.columns = columns
+        self.position_string_list = [f'{c}{i+1}' for i in range(self.columns) for c in 'ABCDEFGH'[:self.rows]]
+        self.data = {pos : None for pos in self.position_string_list}
         self.projects = []
         return
+    
+    @property
+    def number_of_wells(self):
+        return (self.rows * self.columns) + 1
 
     def __setitem__(self, key, value):
         if key not in self.data.keys():
@@ -92,23 +99,40 @@ class Plate(OrderedDict):
             return self.data[key]
 
     def getUsedWells(self):
-        return [Position.from_string(key) for key in self.data.keys() if self.data[key] is not None]
+        return [self.position_from_string(key) for key in self.data.keys() if self.data[key] is not None]
 
     def getFreeWells(self):
-        return [Position.from_string(key) for key in self.data.keys() if self.data[key] is None]
+        return [self.position_from_string(key) for key in self.data.keys() if self.data[key] is None]
 
     def getSamples(self):
         return [sample for sample in self.data.values()]
 
     def addProject(self, project, start_pos):
-        start = position_string_list.index(start_pos.label)
-        wells = position_string_list[start:start + project.num]
-        if all((self.data[well] == None for well in wells)) and start + project.num < 97:
+        start = self.position_string_list.index(start_pos.label)
+        wells = self.position_string_list[start:start + project.num]
+        if all((self.data[well] == None for well in wells)) and start + project.num < self.number_of_wells:
             self.projects.append(project)
             for well, sample in list(zip(wells, project.samples)):
                 self.data[well] = sample
         else:
             raise NotEnoughWellsException
+
+    def position_from_index(self, idx):
+        row = "ABCDEFGH".index(self.position_string_list[idx][:1])
+        col = int(self.position_string_list[idx][1:]) -1
+        lab = self.position_string_list[idx]
+        return Position(row, col, idx, lab)
+
+    def position_from_rowcol(self, row, col):
+        row = row
+        col = col
+        idx = self.position_string_list.index(f'{"ABCDEFGH"[row]}{col + 1}')
+        lab = self.position_string_list[idx]
+        return Position(row, col, idx, lab)
+    
+    def position_from_string(self, instr):
+        idx = self.position_string_list.index(instr)
+        return self.position_from_index(idx)
 
     
     def outputToFile(self, filename):
@@ -148,7 +172,7 @@ class Plate(OrderedDict):
                         if p.name == proj_name:
                             project = p
                             break
-                    sample = Sample(project, sample_name, Position.from_string(position))
+                    sample = Sample(project, sample_name, self.position_from_string(position))
                     project.addSample(sample)
                     self[position] = sample
                     

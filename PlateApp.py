@@ -5,7 +5,7 @@ import Popups
 from Popups import LabeledEntry
 import tkinter as tk
 from tkinter import messagebox, filedialog
-from PlateModel import Sample, Project, Plate, position_string_list
+from PlateModel import Sample, Project, Plate
 from PlateExceptions import *
 from PIL import ImageGrab
 from reportlab.pdfgen import canvas
@@ -22,9 +22,9 @@ class PlateApp(tk.Frame):
         self.root_window = root
         tk.Frame.__init__(self, self.root_window)
 
-        self.root_window.report_callback_exception = self.exceptionHandler
+        # self.root_window.report_callback_exception = self.exceptionHandler
 
-        self.plate = Plate()
+        self.plate = Plate(rows=8, columns=12)
         self.selected_positions = []
         self.selectionChangeListeners = []
 
@@ -151,7 +151,7 @@ class PlateApp(tk.Frame):
     
     def askNewProject(self):
         colors = [color for color in color_list if color not in [proj.color for proj in self.plate.projects]]
-        asker = Popups.AskNewProject(self.root_window, self.plate.getFreeWells(), colors, self.selected_positions)
+        asker = Popups.AskNewProject(self.root_window, self.plate, colors, self.selected_positions)
         self.plate_image.clearSelection()
         self.selectionChangeListeners.append(asker.onSelectionChange)
         self.wait_window(asker)

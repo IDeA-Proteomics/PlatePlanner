@@ -1,6 +1,6 @@
 import tkinter as tk
 import math
-from PlateModel import Sample, Project, Position, position_string_list
+from PlateModel import Sample, Project, Position  ###, position_string_list
 
 
 ###
@@ -104,9 +104,9 @@ class PlateWidget(tk.Frame):
         self.start_y = self.y + inset_y
 
         ### For Vertical plates
-        for j in range(12):
-            for i in range(8):
-                well = Well(self, self.plate, Position.from_rowcol(i, j), self.well_size, self.well_size, self.onWellPress, self.onWellRelease, self.onMove)
+        for j in range(self.plate.columns):
+            for i in range(self.plate.rows):
+                well = Well(self, self.plate, self.plate.position_from_rowcol(i, j), self.well_size, self.well_size, self.onWellPress, self.onWellRelease, self.onMove)
                 self.wells.append(well)
                 xpos = self.start_x + (j * self.well_size)
                 ypos = self.start_y + (i * self.well_size)
@@ -136,7 +136,7 @@ class PlateWidget(tk.Frame):
     def getWellXY(self, x, y):
         row = math.floor((y - self.start_y) / self.well_size)
         col = math.floor((x - self.start_x) / self.well_size)
-        return self.wells[Position.from_rowcol(row, col).index]
+        return self.wells[self.plate.position_from_rowcol(row, col).index]
     
 
     def clearSelection(self):
