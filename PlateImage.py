@@ -72,7 +72,7 @@ class PlateWidget(tk.Frame):
         self.x = platex
         self.y = platey
         self.w = platew
-        self.h = math.floor(self.w * (8/12))
+        self.h = math.floor(self.w * (self.plate.rows/self.plate.columns))
 
         self.selecting = False
         self.selection_start = None
