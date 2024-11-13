@@ -1,5 +1,5 @@
 
-
+import os
 import PlateImage
 import Popups
 from Popups import LabeledEntry
@@ -87,6 +87,7 @@ class PlateApp(tk.Frame):
             c.drawString(10, label_y, proj.name)
         c.save()
 
+        os.remove("temp.png")
 
         return
     
