@@ -4,7 +4,7 @@ import PlateImage
 import Popups
 from Popups import LabeledEntry
 import tkinter as tk
-from tkinter import messagebox, filedialog
+from tkinter import messagebox, filedialog, Menu
 from PlateModel import Sample, Project, Plate
 from PlateExceptions import *
 from PIL import ImageGrab
@@ -49,15 +49,53 @@ class PlateApp(tk.Frame):
         self.proj_list_frame = tk.Frame(self.proj_frame)
         self.proj_list_frame.pack(side=tk.TOP)
 
-        self.save_button = tk.Button(self.proj_frame, text="Save", command=self.onSave)
-        self.save_button.pack(side=tk.TOP)
+        # self.save_button = tk.Button(self.proj_frame, text="Save", command=self.onSave)
+        # self.save_button.pack(side=tk.TOP)
 
-        self.load_button = tk.Button(self.proj_frame, text="Load", command=self.loadFromFile)
-        self.load_button.pack(side=tk.TOP)
+        # self.load_button = tk.Button(self.proj_frame, text="Load", command=self.loadFromFile)
+        # self.load_button.pack(side=tk.TOP)
 
-        self.pdf_button = tk.Button(self.proj_frame, text="PDF", command=self.saveImage)
-        self.pdf_button.pack(side=tk.TOP)
+        # self.pdf_button = tk.Button(self.proj_frame, text="PDF", command=self.saveImage)
+        # self.pdf_button.pack(side=tk.TOP)
 
+        self.createMenu()
+
+        return
+
+    def createMenu(self):
+
+        self.menubar = Menu(self.root_window)
+
+        self.filemenu = Menu(self.menubar, tearoff=0)
+        self.filemenu.add_command(label="New", command=self.filemenu_new)
+        self.filemenu.add_command(label="Open", command=self.filemenu_open)
+        self.filemenu.add_command(label="Save", command=self.filemenu_save)        
+
+
+        self.menubar.add_cascade(label="File", menu=self.filemenu)
+        self.menubar.add_command(label="To PDF", command=self.filemenu_savepdf)
+
+        self.root_window.config(menu=self.menubar)
+
+        return
+    
+    def filemenu_new(self):
+        self.plate = Plate(rows=8, columns=12)
+        self.plate_image.resetPlate(self.plate)
+        return
+
+    def filemenu_open(self):
+        self.plate = Plate(rows=8, columns=12)
+        self.loadFromFile()
+        self.plate_image.resetPlate(self.plate)
+        return
+
+    def filemenu_save(self):
+        self.onSave()
+        return
+
+    def filemenu_savepdf(self):
+        self.saveImage()
         return
 
     def saveImage(self):

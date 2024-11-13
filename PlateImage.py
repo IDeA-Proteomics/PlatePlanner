@@ -135,6 +135,11 @@ class PlateWidget(tk.Frame):
 
         return
     
+    def resetPlate(self, plate):
+        self.plate = plate
+        self.canvas.destroy()
+        self.draw()
+    
     def getWellXY(self, x, y):
         if x < self.start_x:
             x = self.start_x
