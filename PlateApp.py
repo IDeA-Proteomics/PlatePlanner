@@ -1,5 +1,6 @@
 
 import os
+import math
 import PlateImage
 import Popups
 from Popups import LabeledEntry
@@ -7,7 +8,6 @@ import tkinter as tk
 from tkinter import messagebox, filedialog, Menu
 from PlateModel import Sample, Project, Plate
 from PlateExceptions import *
-from PIL import ImageGrab
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 
@@ -22,7 +22,7 @@ class PlateApp(tk.Frame):
         self.root_window = root
         tk.Frame.__init__(self, self.root_window)
 
-        self.root_window.report_callback_exception = self.exceptionHandler
+        # self.root_window.report_callback_exception = self.exceptionHandler
 
         self.plate = Plate(rows=8, columns=12)
         self.selected_positions = []
@@ -105,27 +105,57 @@ class PlateApp(tk.Frame):
         y = self.root_window.winfo_rooty() + self.plate_image.canvas.winfo_y()
         x1 = x + self.plate_image.canvas.winfo_width()
         y1 = y + self.plate_image.canvas.winfo_height()
-
-        ImageGrab.grab(bbox=(x, y, x1, y1)).save("temp.png")
-
         ### coords for image on PDF
-        image_height = A4[0] / self.plate_image.canvas.winfo_width() * self.plate_image.canvas.winfo_height()
+        image_height = (A4[0] - 30) / self.plate_image.canvas.winfo_width() * self.plate_image.canvas.winfo_height()
 
         c = canvas.Canvas('output.pdf', pagesize=A4)
-        c.setFont("Helvetica", 30)
-        c.setFillColor('red')
         image_bottom = A4[1] - image_height - 50
-        x2, y2 = c.drawImage("temp.png", 0, image_bottom, width=A4[0], preserveAspectRatio=True)
+        self.drawPlate(c, (15, image_bottom), image_height, A4[1])
 
         label_y = image_bottom
-
+        
+        c.setFont("Helvetica", 30)
         for proj in self.plate.projects:
             label_y -= 40
             c.setFillColor(proj.color)
+            c.rect(10, label_y, c.stringWidth(proj.name), 30, stroke=0, fill=1)
+            c.setFillColor('black')
             c.drawString(10, label_y, proj.name)
         c.save()
 
-        os.remove("temp.png")
+        return
+    
+    def drawPlate(self, canvas, bottom_left, height, width):
+
+        if width > 12/8 * height:
+            width = math.floor(12/8 * height)
+        elif height > 8/12 * width:
+            height = math.floor(8/12 * width)
+
+        canvas.rect(bottom_left[0], bottom_left[1], width, height, fill=0)
+        inset_y = math.floor(height/10)
+        well_size = math.floor((height - (2 * inset_y)) / 7)
+        well_radius = math.floor(well_size * 0.45)
+        inset_x = math.floor((width - (11 * well_size)) / 2)
+
+        def getWellCenter(position):
+            x = bottom_left[0] + inset_x  + (well_size * position.column)
+            y = bottom_left[1] + height - inset_y - (well_size * position.row)     
+            return (x,y)
+        
+        
+        txh = well_radius // 1.3
+        canvas.setFont("Helvetica", txh)
+        for well in self.plate.positions:
+            label = well.label
+            x,y = getWellCenter(well)            
+            canvas.setFillColor(self.plate[label].project.color if self.plate[label] else 'blue')
+            canvas.circle(x, y, well_radius, stroke=1, fill=1)
+            txw = canvas.stringWidth(label)
+            cx = x - (txw/2)
+            cy = y - (txh/2) * 0.92
+            canvas.setFillColor('black')
+            canvas.drawString(cx, cy, label)
 
         return
     

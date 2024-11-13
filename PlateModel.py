@@ -86,6 +86,11 @@ class Plate(OrderedDict):
     @property
     def number_of_wells(self):
         return (self.rows * self.columns) + 1
+    
+    @property
+    def positions(self):
+        return [self.position_from_string(pos) for pos in self.position_string_list]
+
 
     def __setitem__(self, key, value):
         if key not in self.data.keys():
