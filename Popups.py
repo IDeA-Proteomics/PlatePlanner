@@ -25,6 +25,44 @@ class LabeledEntry(tk.Frame):
         self.entry_text.set(text)
         return
 
+class AskNewPlate(tk.Toplevel):
+
+    def __init__(self, parent):
+        self.parent = parent
+        tk.Toplevel.__init__(self, self.parent)
+        self.cols = None
+        self.rows = None
+
+        values = [i for i in range(1, 25)]
+
+        self.frame = tk.Frame(self)
+        self.frame.pack()
+
+        self.rowVar = tk.IntVar(value=8)
+        self.colVar = tk.IntVar(value=12)
+
+        self.rowLabel = tk.Label(self.frame, text="Number of Rows")
+        self.rowLabel.pack()
+        self.rowCombo = ttk.Combobox(self.frame, textvariable=self.rowVar, values=values, state='readonly', width=10)
+        self.rowCombo.pack()
+        self.colLabel = tk.Label(self.frame, text="Number of Columns")
+        self.colLabel.pack()
+        self.colCombo = ttk.Combobox(self.frame, textvariable=self.colVar, values=values, state='readonly', width=10)
+        self.colCombo.pack()
+
+        self.button = tk.Button(self.frame, text="OK", command=self.onOK)
+        self.button.pack()
+    
+
+        return
+
+    def onOK(self):
+        self.rows = self.rowVar.get()
+        self.cols = self.colVar.get()
+        self.destroy()
+        return
+
+
 
 class AskNewProject(tk.Toplevel):
 

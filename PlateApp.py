@@ -71,7 +71,14 @@ class PlateApp(tk.Frame):
         return
     
     def filemenu_new(self):
-        self.plate = Plate(rows=8, columns=12)
+        asker = Popups.AskNewPlate(self.root_window)
+        self.wait_window(asker)
+        rows = 8
+        cols = 12
+        if asker.rows and asker.cols:
+            rows = asker.rows
+            cols = asker.cols            
+        self.plate = Plate(rows=rows, columns=cols)
         self.plate_image.resetPlate(self.plate)
         return
 
