@@ -105,14 +105,22 @@ class PlateWidget(tk.Frame):
         self.end_x = self.start_x + (self.w - (2 * inset_x))
         self.end_y = self.start_y + (self.h - (2 * inset_y))
 
+        for pos in self.plate.positions:
+            well = Well(self, self.plate, pos, self.well_size, self.well_size, self.onWellPress, self.onWellRelease, self.onMove)
+            self.wells.append(well)
+            xpos = self.start_x + (pos.column * self.well_size)
+            ypos = self.start_y + (pos.row * self.well_size)
+            self.canvas.create_window(xpos, ypos, window=well)
+
+
         ### For Vertical plates
-        for j in range(self.plate.columns):
-            for i in range(self.plate.rows):
-                well = Well(self, self.plate, self.plate.position_from_rowcol(i, j), self.well_size, self.well_size, self.onWellPress, self.onWellRelease, self.onMove)
-                self.wells.append(well)
-                xpos = self.start_x + (j * self.well_size)
-                ypos = self.start_y + (i * self.well_size)
-                self.canvas.create_window(xpos, ypos, window=well)
+        # for j in range(self.plate.columns):
+        #     for i in range(self.plate.rows):
+        #         well = Well(self, self.plate, self.plate.position_from_rowcol(i, j), self.well_size, self.well_size, self.onWellPress, self.onWellRelease, self.onMove)
+        #         self.wells.append(well)
+        #         xpos = self.start_x + (j * self.well_size)
+        #         ypos = self.start_y + (i * self.well_size)
+        #         self.canvas.create_window(xpos, ypos, window=well)
 
         ###  For Horizontal plates
         # for j in range(8):
