@@ -136,9 +136,9 @@ class PlateApp(tk.Frame):
 
         canvas.rect(bottom_left[0], bottom_left[1], width, height, fill=0)
         inset_y = math.floor(height/10)
-        well_size = math.floor((height - (2 * inset_y)) / (self.plate.rows))
+        well_size = math.floor((height - (2 * inset_y)) / (self.plate.rows -1))
         well_radius = math.floor(well_size * 0.45)
-        inset_x = math.floor((width - ((self.plate.columns) * well_size)) / 2)
+        inset_x = math.floor((width - ((self.plate.columns - 1) * well_size)) / 2)
 
         def getWellCenter(position):
             x = bottom_left[0] + inset_x  + (well_size * position.column)

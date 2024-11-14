@@ -96,7 +96,7 @@ class PlateWidget(tk.Frame):
 
         inset_y = math.floor(self.h / 10)
 
-        self.well_size = math.floor((self.h - (2 * inset_y)) / (self.plate.rows -1))
+        self.well_size = math.floor((self.h - (2 * inset_y)) / (self.plate.rows))
 
         inset_x = math.floor((self.w - ( (self.plate.columns -1 )* self.well_size)) / 2)
 
