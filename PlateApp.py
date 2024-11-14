@@ -127,16 +127,18 @@ class PlateApp(tk.Frame):
     
     def drawPlate(self, canvas, bottom_left, height, width):
 
-        if width > 12/8 * height:
-            width = math.floor(12/8 * height)
-        elif height > 8/12 * width:
-            height = math.floor(8/12 * width)
+        ratio = self.plate.columns / self.plate.rows
+
+        if width > ratio * height:
+            width = math.floor(ratio * height)
+        elif height > (1/ratio) * width:
+            height = math.floor((1/ratio) * width)
 
         canvas.rect(bottom_left[0], bottom_left[1], width, height, fill=0)
         inset_y = math.floor(height/10)
-        well_size = math.floor((height - (2 * inset_y)) / 7)
+        well_size = math.floor((height - (2 * inset_y)) / (self.plate.rows))
         well_radius = math.floor(well_size * 0.45)
-        inset_x = math.floor((width - (11 * well_size)) / 2)
+        inset_x = math.floor((width - ((self.plate.columns) * well_size)) / 2)
 
         def getWellCenter(position):
             x = bottom_left[0] + inset_x  + (well_size * position.column)
