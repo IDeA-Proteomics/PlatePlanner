@@ -35,8 +35,6 @@ class AskNewProject(tk.Toplevel):
         self.plate = plate
         self.name = None
         self.number = None
-        # self.start_row = "ABCDEFGH".index(start_position[:1])
-        # self.start_column = int(start_position[1:])
         self.position = None
         self.color = None
 
@@ -75,8 +73,6 @@ class AskNewProject(tk.Toplevel):
 
 
         self.transient(self.parent)
-        # self.grab_set()
-        # self.parent.wait_window(self)
 
         return
     
@@ -95,8 +91,6 @@ class AskNewProject(tk.Toplevel):
         self.name = self.name_entry.get()
         num = self.number_entry.get()
         self.number = int(num) if num.isnumeric() and int(num) < self.plate.number_of_wells else 0
-        # self.start_row = "ABCDEFGH".index(start_position[:1])
-        # self.start_column = int(start_position[1:])
         self.position = self.plate.position_from_string(self.start_position_var.get())
         self.color = self.color_var.get()
         self.destroy()

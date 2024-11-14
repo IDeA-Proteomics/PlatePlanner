@@ -49,15 +49,6 @@ class PlateApp(tk.Frame):
         self.proj_list_frame = tk.Frame(self.proj_frame)
         self.proj_list_frame.pack(side=tk.TOP)
 
-        # self.save_button = tk.Button(self.proj_frame, text="Save", command=self.onSave)
-        # self.save_button.pack(side=tk.TOP)
-
-        # self.load_button = tk.Button(self.proj_frame, text="Load", command=self.loadFromFile)
-        # self.load_button.pack(side=tk.TOP)
-
-        # self.pdf_button = tk.Button(self.proj_frame, text="PDF", command=self.saveImage)
-        # self.pdf_button.pack(side=tk.TOP)
-
         self.createMenu()
 
         return
@@ -99,29 +90,31 @@ class PlateApp(tk.Frame):
         return
 
     def saveImage(self):
+        filename = filedialog.asksaveasfilename(parent=self.root_window, title="Save Plate Image as PDF", defaultextension='.pdf', filetypes=(("PDF File", "*.pdf"),("All Files", "*.*")))
+        if filename:
 
-        ### Window coords for the screen grab
-        x = self.root_window.winfo_rootx() + self.plate_image.canvas.winfo_x()
-        y = self.root_window.winfo_rooty() + self.plate_image.canvas.winfo_y()
-        x1 = x + self.plate_image.canvas.winfo_width()
-        y1 = y + self.plate_image.canvas.winfo_height()
-        ### coords for image on PDF
-        image_height = (A4[0] - 30) / self.plate_image.canvas.winfo_width() * self.plate_image.canvas.winfo_height()
+            ### Window coords for the screen grab
+            x = self.root_window.winfo_rootx() + self.plate_image.canvas.winfo_x()
+            y = self.root_window.winfo_rooty() + self.plate_image.canvas.winfo_y()
+            x1 = x + self.plate_image.canvas.winfo_width()
+            y1 = y + self.plate_image.canvas.winfo_height()
+            ### coords for image on PDF
+            image_height = (A4[0] - 30) / self.plate_image.canvas.winfo_width() * self.plate_image.canvas.winfo_height()
 
-        c = canvas.Canvas('output.pdf', pagesize=A4)
-        image_bottom = A4[1] - image_height - 50
-        self.drawPlate(c, (15, image_bottom), image_height, A4[1])
+            c = canvas.Canvas(filename, pagesize=A4)
+            image_bottom = A4[1] - image_height - 50
+            self.drawPlate(c, (15, image_bottom), image_height, A4[1])
 
-        label_y = image_bottom
-        
-        c.setFont("Helvetica", 30)
-        for proj in self.plate.projects:
-            label_y -= 40
-            c.setFillColor(proj.color)
-            c.rect(10, label_y, c.stringWidth(proj.name), 30, stroke=0, fill=1)
-            c.setFillColor('black')
-            c.drawString(10, label_y, proj.name)
-        c.save()
+            label_y = image_bottom
+            
+            c.setFont("Helvetica", 30)
+            for proj in self.plate.projects:
+                label_y -= 40
+                c.setFillColor(proj.color)
+                c.rect(10, label_y, c.stringWidth(proj.name), 30, stroke=0, fill=1)
+                c.setFillColor('black')
+                c.drawString(10, label_y, proj.name)
+            c.save()
 
         return
     

@@ -18,28 +18,7 @@ class Position(object):
         self.column = col
         self.index = idx
         self.label = lab
-        return
-    
-    # @classmethod
-    # def from_index(cls, idx):
-    #     row = "ABCDEFGH".index(position_string_list[idx][:1])
-    #     col = int(position_string_list[idx][1:]) -1
-    #     lab = position_string_list[idx]
-    #     return cls(row, col, idx, lab)
-
-    # @classmethod
-    # def from_rowcol(cls, row, col):
-    #     row = row
-    #     col = col
-    #     idx = position_string_list.index(f'{"ABCDEFGH"[row]}{col + 1}')
-    #     lab = position_string_list[idx]
-    #     return cls(row, col, idx, lab)
-    
-    # @classmethod
-    # def from_string(cls, instr):
-    #     idx = position_string_list.index(instr)
-    #     return Position.from_index(idx)
-    
+        return    
 
 
 class Sample(object):
