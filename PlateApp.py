@@ -100,11 +100,11 @@ class PlateApp(tk.Frame):
         filename = filedialog.asksaveasfilename(parent=self.root_window, title="Save Plate Image as PDF", defaultextension='.pdf', filetypes=(("PDF File", "*.pdf"),("All Files", "*.*")))
         if filename:
 
-            ### Window coords for the screen grab
-            x = self.root_window.winfo_rootx() + self.plate_image.canvas.winfo_x()
-            y = self.root_window.winfo_rooty() + self.plate_image.canvas.winfo_y()
-            x1 = x + self.plate_image.canvas.winfo_width()
-            y1 = y + self.plate_image.canvas.winfo_height()
+            # ### Window coords for the screen grab
+            # x = self.root_window.winfo_rootx() + self.plate_image.canvas.winfo_x()
+            # y = self.root_window.winfo_rooty() + self.plate_image.canvas.winfo_y()
+            # x1 = x + self.plate_image.canvas.winfo_width()
+            # y1 = y + self.plate_image.canvas.winfo_height()
             ### coords for image on PDF
             image_height = (A4[0] - 30) / self.plate_image.canvas.winfo_width() * self.plate_image.canvas.winfo_height()
 
@@ -136,13 +136,13 @@ class PlateApp(tk.Frame):
 
         canvas.rect(bottom_left[0], bottom_left[1], width, height, fill=0)
         inset_y = math.floor(height/10)
-        well_size = math.floor((height - (2 * inset_y)) / (self.plate.rows -1))
+        well_size = math.floor((height - (2 * inset_y)) / (self.plate.rows))
         well_radius = math.floor(well_size * 0.45)
-        inset_x = math.floor((width - ((self.plate.columns - 1) * well_size)) / 2)
+        inset_x = math.floor((width - ((self.plate.columns) * well_size)) / 2)
 
         def getWellCenter(position):
-            x = bottom_left[0] + inset_x  + (well_size * position.column)
-            y = bottom_left[1] + height - inset_y - (well_size * position.row)     
+            x = bottom_left[0] + inset_x  + (well_size * position.column) + (well_size / 2)
+            y = bottom_left[1] + height - inset_y - (well_size * position.row) - (well_size / 2)  
             return (x,y)
         
         
