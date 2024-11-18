@@ -33,22 +33,19 @@ class AskNewPlate(tk.Toplevel):
         self.cols = None
         self.rows = None
 
-        values = [i for i in range(1, 25)]
+        values = ["8x12", "4x6"]
 
         self.frame = tk.Frame(self)
         self.frame.pack()
 
         self.rowVar = tk.IntVar(value=8)
         self.colVar = tk.IntVar(value=12)
+        self.sizeVar = tk.StringVar(value=values[0])
 
-        self.rowLabel = tk.Label(self.frame, text="Number of Rows")
-        self.rowLabel.pack()
-        self.rowCombo = ttk.Combobox(self.frame, textvariable=self.rowVar, values=values, state='readonly', width=10)
-        self.rowCombo.pack()
-        self.colLabel = tk.Label(self.frame, text="Number of Columns")
-        self.colLabel.pack()
-        self.colCombo = ttk.Combobox(self.frame, textvariable=self.colVar, values=values, state='readonly', width=10)
-        self.colCombo.pack()
+        self.sizeLabel = tk.Label(self.frame, text="Plate Size")
+        self.sizeLabel.pack()
+        self.sizeCombo = ttk.Combobox(self.frame, textvariable=self.sizeVar, values=values, state='readonly', width=10)
+        self.sizeCombo.pack()
 
         self.button = tk.Button(self.frame, text="OK", command=self.onOK)
         self.button.pack()
@@ -57,8 +54,9 @@ class AskNewPlate(tk.Toplevel):
         return
 
     def onOK(self):
-        self.rows = self.rowVar.get()
-        self.cols = self.colVar.get()
+        result = self.sizeVar.get()
+        self.rows = 4 if result == "4x6" else 8
+        self.cols = 6 if result == "4x6" else 12
         self.destroy()
         return
 

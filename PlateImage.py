@@ -98,7 +98,7 @@ class PlateWidget(tk.Frame):
 
         self.well_size = math.floor((self.h - (2 * inset_y)) / (self.plate.rows))
 
-        inset_x = math.floor((self.w - ( (self.plate.columns -1 )* self.well_size)) / 2)
+        inset_x = math.floor((self.w - ((self.plate.columns)* self.well_size)) / 2)
 
         self.start_x = self.x + inset_x
         self.start_y = self.y + inset_y
@@ -110,7 +110,7 @@ class PlateWidget(tk.Frame):
             self.wells.append(well)
             xpos = self.start_x + (pos.column * self.well_size)
             ypos = self.start_y + (pos.row * self.well_size)
-            self.canvas.create_window(xpos, ypos, window=well)
+            self.canvas.create_window(xpos, ypos, window=well, anchor=tk.NW)
 
 
         ### For Vertical plates
