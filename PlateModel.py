@@ -53,11 +53,15 @@ color_list = ['red', 'orange', 'yellow', 'green', 'purple', 'cyan', 'magenta', '
 
 class Plate(OrderedDict):
 
-    def __init__(self, rows, columns):
+    def __init__(self, rows, columns, vertical=True):
         super().__init__()
         self.rows = rows
         self.columns = columns
-        self.position_string_list = [f'{c}{i+1}' for i in range(self.columns) for c in row_letters[:self.rows]]
+        self.vertical = vertical
+        if self.vertical:
+            self.position_string_list = [f'{c}{i+1}' for i in range(self.columns) for c in row_letters[:self.rows]]
+        else:
+            self.position_string_list = [f'{c}{i+1}' for c in row_letters[:self.rows] for i in range(self.columns)]
         self.data = {pos : None for pos in self.position_string_list}
         self.projects = []
         return

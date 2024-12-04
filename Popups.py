@@ -32,8 +32,10 @@ class AskNewPlate(tk.Toplevel):
         tk.Toplevel.__init__(self, self.parent)
         self.cols = None
         self.rows = None
+        self.vertical = True
 
         values = ["8x12", "4x6"]
+        orients = ["Vertical", "Horizontal"]
 
         self.frame = tk.Frame(self)
         self.frame.pack()
@@ -41,11 +43,14 @@ class AskNewPlate(tk.Toplevel):
         self.rowVar = tk.IntVar(value=8)
         self.colVar = tk.IntVar(value=12)
         self.sizeVar = tk.StringVar(value=values[0])
+        self.orientVar = tk.StringVar(value=orients[0])
 
         self.sizeLabel = tk.Label(self.frame, text="Plate Size")
         self.sizeLabel.pack()
         self.sizeCombo = ttk.Combobox(self.frame, textvariable=self.sizeVar, values=values, state='readonly', width=10)
         self.sizeCombo.pack()
+        self.orientCombo = ttk.Combobox(self.frame, textvariable=self.orientVar, values=orients, state='readonly', width=10)
+        self.orientCombo.pack()
 
         self.button = tk.Button(self.frame, text="OK", command=self.onOK)
         self.button.pack()
@@ -57,6 +62,7 @@ class AskNewPlate(tk.Toplevel):
         result = self.sizeVar.get()
         self.rows = 4 if result == "4x6" else 8
         self.cols = 6 if result == "4x6" else 12
+        self.vertical = True if self.orientVar.get() == "Vertical" else False
         self.destroy()
         return
 

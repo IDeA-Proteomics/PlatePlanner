@@ -77,8 +77,9 @@ class PlateApp(tk.Frame):
         cols = 12
         if asker.rows and asker.cols:
             rows = asker.rows
-            cols = asker.cols            
-        self.plate = Plate(rows=rows, columns=cols)
+            cols = asker.cols 
+            vertical = asker.vertical           
+        self.plate = Plate(rows=rows, columns=cols, vertical=vertical)
         self.plate_image.resetPlate(self.plate)
         return
 
