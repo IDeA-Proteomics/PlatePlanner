@@ -84,7 +84,6 @@ class PlateApp(tk.Frame):
         return
 
     def filemenu_open(self):
-        self.plate = Plate(rows=8, columns=12)
         self.loadFromFile()
         self.plate_image.resetPlate(self.plate)
         return
@@ -171,13 +170,13 @@ class PlateApp(tk.Frame):
         filename = filedialog.askopenfilename(parent=self.root_window, title="Open Plate File", filetypes=(("Plate File", "*.plate"),("All Files", "*.*")))
         if filename:
             try:
-                self.plate.loadFromFile(filename)
+                self.plate = Plate.loadFromFile(filename)
             except DuplicateEntryException:
                 messagebox.showerror("Error", "Plate file has duplicate entries")
             except MissingEntryException:
                 messagebox.showerror("Error", "Plate file has missing entries")
             self.redrawList()
-            self.plate_image.redrawSamples()
+            # self.plate_image.redrawSamples()
 
         return
     

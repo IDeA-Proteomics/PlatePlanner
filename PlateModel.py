@@ -131,7 +131,7 @@ class Plate(OrderedDict):
 
             writer = csv.writer(file)
             
-            row = ['Index', 'Position', 'Project', 'Sample']
+            row = ['Index', 'Position', 'Project', 'Sample', str(self.rows), str(self.columns), str(self.vertical)]
             writer.writerow(row)
             idx = 0
             for (well, sample) in self.data.items():
@@ -144,26 +144,35 @@ class Plate(OrderedDict):
                 writer.writerow(row)
                 idx += 1
         return
-
-    def loadFromFile(self, filename):
+        
+    @classmethod
+    def loadFromFile(cls, filename):
         
         with open(filename, 'r') as file:
             reader = csv.reader(file)
+
+            head = list(reader)[:1]
+
+            r = int(head[0][4])
+            c = int(head[0][5])
+            v = False if head[0][6] == 'False' else True
+
+            newPlate = Plate(r, c, v)
 
             for line in list(reader)[1:]:
                 position = line[1]
                 proj_name = line[2]
                 sample_name = line[3]
                 if sample_name != 'EMPTY' and proj_name != 'EMPTY':
-                    if proj_name not in [p.name for p in self.projects]:
-                        self.projects.append(Project(proj_name, color_list[len(self.projects)%len(color_list)]))
+                    if proj_name not in [p.name for p in newPlate.projects]:
+                        newPlate.projects.append(Project(proj_name, color_list[len(newPlate.projects)%len(color_list)]))
                         project = None
-                    for p in self.projects:
+                    for p in newPlate.projects:
                         if p.name == proj_name:
                             project = p
                             break
-                    sample = Sample(project, sample_name, self.position_from_string(position))
+                    sample = Sample(project, sample_name, newPlate.position_from_string(position))
                     project.addSample(sample)
-                    self[position] = sample
+                    newPlate[position] = sample
                     
-        return
+        return newPlate
