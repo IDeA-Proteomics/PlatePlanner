@@ -37,7 +37,7 @@ class PlateApp(tk.Frame):
         self.proj_frame = tk.Frame(self.main_frame)
         self.proj_frame.pack(side=tk.LEFT)
 
-        self.plate_image = PlateImage.PlateWidget(self.plate_frame, plate=self.plate, platex=10, platey=10, platew=600, onSelectionChange=self.onPlateSelectionChange)
+        self.plate_image = PlateImage.PlateWidget(self.plate_frame, plate=self.plate, platex=10, platey=10, platew=450, onSelectionChange=self.onPlateSelectionChange)
         self.plate_image.pack()
 
         self.add_button = tk.Button(self.proj_frame, text="Add", command=self.onAdd)

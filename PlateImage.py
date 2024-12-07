@@ -36,7 +36,7 @@ class Well(tk.Canvas):
         fill = 'blue' if self.plate[self.position] is None else self.plate[self.position].project.color
 
         self.well = self.create_oval(self.w/2 - self.radius, self.h/2 - self.radius, self.w/2 + self.radius, self.h/2 + self.radius, fill=fill)
-        self.create_text(self.w / 2, self.h / 2, text=self.position.label)
+        self.create_text(self.w / 2, self.h / 2, text=self.position.label, font=('Arial', int(self.radius/1.5)))
         return
     
     def redraw(self):
