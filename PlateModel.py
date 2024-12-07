@@ -151,15 +151,15 @@ class Plate(OrderedDict):
         with open(filename, 'r') as file:
             reader = csv.reader(file)
 
-            head = list(reader)[:1]
+            readList = list(reader)
 
-            r = int(head[0][4])
-            c = int(head[0][5])
-            v = False if head[0][6] == 'False' else True
+            r = int(readList[0][4])
+            c = int(readList[0][5])
+            v = False if readList[0][6] == 'False' else True
 
             newPlate = Plate(r, c, v)
 
-            for line in list(reader)[1:]:
+            for line in list(readList)[1:]:
                 position = line[1]
                 proj_name = line[2]
                 sample_name = line[3]

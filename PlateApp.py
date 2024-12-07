@@ -80,12 +80,12 @@ class PlateApp(tk.Frame):
             cols = asker.cols 
             vertical = asker.vertical           
         self.plate = Plate(rows=rows, columns=cols, vertical=vertical)
+        self.redrawList()
         self.plate_image.resetPlate(self.plate)
         return
 
     def filemenu_open(self):
         self.loadFromFile()
-        self.plate_image.resetPlate(self.plate)
         return
 
     def filemenu_save(self):
@@ -176,7 +176,7 @@ class PlateApp(tk.Frame):
             except MissingEntryException:
                 messagebox.showerror("Error", "Plate file has missing entries")
             self.redrawList()
-            # self.plate_image.redrawSamples()
+            self.plate_image.resetPlate(self.plate)
 
         return
     
