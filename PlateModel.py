@@ -127,25 +127,32 @@ class Plate(OrderedDict):
         idx = self.position_string_list.index(instr)
         return self.position_from_index(idx)
 
-    
-    def outputToFile(self, filename):
-
-        with open(filename, 'w', newline='') as file:
-
-            writer = csv.writer(file)
-            
-            row = ['Index', 'Position', 'Project', 'Sample', str(self.rows), str(self.columns), str(self.vertical)]
+    @classmethod
+    def outputCSV(self, writer, plate):
+        # if isinstance(plates, list):
+        #     for plate in plates:
+        #         Plate.outputCSV(writer, plate)
+        # else:
+        row = ['Index', 'Position', 'Project', 'Sample', str(plate.rows), str(plate.columns), str(plate.vertical)]
+        writer.writerow(row)
+        idx = 0
+        for (well, sample) in plate.data.items():
+            row = [
+                idx,
+                well,
+                sample.project.name if sample is not None else 'EMPTY',
+                sample.name if sample is not None else 'EMPTY'
+            ]
             writer.writerow(row)
-            idx = 0
-            for (well, sample) in self.data.items():
-                row = [
-                    idx,
-                    well,
-                    sample.project.name if sample is not None else 'EMPTY',
-                    sample.name if sample is not None else 'EMPTY'
-                ]
-                writer.writerow(row)
-                idx += 1
+            idx += 1
+        return
+    
+    @classmethod
+    def saveToFile(self, filename, plates):
+        with open(filename, 'w', newline='') as file:
+            writer = csv.writer(file)
+            for plate in plates:
+                Plate.outputCSV(writer, plate)            
         return
         
     @classmethod
@@ -156,19 +163,35 @@ class Plate(OrderedDict):
 
             readList = list(reader)
 
-            r = int(readList[0][4])
-            c = int(readList[0][5])
-            v = False if readList[0][6] == 'False' else True
+            def getRCV(line):
+                r = int(line[4])
+                c = int(line[5])
+                v = False if line[6] == 'False' else True
+                return (r, c, v)
 
+            # r = int(readList[0][4])
+            # c = int(readList[0][5])
+            # v = False if readList[0][6] == 'False' else True
+
+            plates = []
+            r, c, v = getRCV(readList[0])
             newPlate = Plate(r, c, v)
 
+            pcount = 0
+
             for line in list(readList)[1:]:
+                if line[0] == 'Index':
+                    plates.append(newPlate)
+                    r, c, v = getRCV(line)
+                    newPlate = Plate(r, c, v)
+                    continue
                 position = line[1]
                 proj_name = line[2]
                 sample_name = line[3]
                 if sample_name != 'EMPTY' and proj_name != 'EMPTY':
                     if proj_name not in [p.name for p in newPlate.projects]:
-                        newPlate.projects.append(Project(proj_name, color_list[len(newPlate.projects)%len(color_list)]))
+                        newPlate.projects.append(Project(proj_name, color_list[pcount%len(color_list)]))
+                        pcount += 1
                         project = None
                     for p in newPlate.projects:
                         if p.name == proj_name:
@@ -177,5 +200,6 @@ class Plate(OrderedDict):
                     sample = Sample(project, sample_name, newPlate.position_from_string(position))
                     project.addSample(sample)
                     newPlate[position] = sample
+            plates.append(newPlate)
                     
-        return newPlate
+        return plates

@@ -151,6 +151,7 @@ class PlateApp(tk.Frame):
 
         return
 
+
     def saveImage(self):
         filename = filedialog.asksaveasfilename(parent=self.root_window, title="Save Plate Image as PDF", defaultextension='.pdf', filetypes=(("PDF File", "*.pdf"),("All Files", "*.*")))
         if filename:
@@ -213,19 +214,19 @@ class PlateApp(tk.Frame):
     def onSave(self):
         filename = filedialog.asksaveasfilename(parent=self.root_window, title="Save Plate File", defaultextension='.plate', filetypes=(("Plate File", "*.plate"),("All Files", "*.*")))
         if filename:
-            self.plate.outputToFile(filename)
+            Plate.saveToFile(filename, self.plates)
     
     def loadFromFile(self):
         filename = filedialog.askopenfilename(parent=self.root_window, title="Open Plate File", filetypes=(("Plate File", "*.plate"),("All Files", "*.*")))
         if filename:
             try:
-                self.plate = Plate.loadFromFile(filename)
+                self.plates = Plate.loadFromFile(filename)
+                self.redrawList()
+                self.resetPlates()
             except DuplicateEntryException:
                 messagebox.showerror("Error", "Plate file has duplicate entries")
             except MissingEntryException:
                 messagebox.showerror("Error", "Plate file has missing entries")
-            self.redrawList()
-            self.plate_image.resetPlate(self.plate)
 
         return
     
