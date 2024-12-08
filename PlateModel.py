@@ -273,16 +273,31 @@ class Plate(OrderedDict):
             return (x,y)
         
         
-        txh = well_radius // 1.3
+        txh = math.floor(well_radius * 1.3)
+        canvas.setFont("Helvetica", txh)
+        for i in range(plate.columns):
+            label = str(i+1)
+            txw = canvas.stringWidth(label)
+            xpos = bottom_left[0] + inset_x + (i * well_size) + (well_size/2) - (txw/2)
+            ypos = bottom_left[1] - (inset_y * 0.9) + height
+            canvas.drawString(xpos, ypos, label)
+        for i in range(plate.rows):
+            label = "ABCDEFGH"[i]
+            txw = canvas.stringWidth(label)
+            xpos = bottom_left[0] + (inset_x * 0.9) - txw
+            ypos = bottom_left[1] + height - inset_y - (i * well_size) - (well_size/2) - (txh/2)
+            canvas.drawString(xpos, ypos, label)
+
+        txh = well_radius *1.3
         canvas.setFont("Helvetica", txh)
         for well in plate.positions:
-            label = well.label
+            label = plate[well.label].number if plate[well.label] is not None else ''
             x,y = getWellCenter(well)            
-            canvas.setFillColor(plate[label].project.color if plate[label] else 'blue')
+            canvas.setFillColor(plate[well.label].project.color if plate[well.label] else 'blue')
             canvas.circle(x, y, well_radius, stroke=1, fill=1)
             txw = canvas.stringWidth(label)
             cx = x - (txw/2)
-            cy = y - (txh/2) * 0.92
+            cy = y - (txh/2) * 0.9
             canvas.setFillColor('black')
             canvas.drawString(cx, cy, label)
 
