@@ -14,6 +14,13 @@ from reportlab.lib.pagesizes import A4
 
 color_list = ['red', 'orange', 'yellow', 'green', 'purple', 'cyan', 'magenta', 'brown']
 
+####  TODO:
+####     wrap long projects to second plate
+###      fix pdf output
+###      let Position have a reference ot Plate
+###      fix color wheel issues
+###      When adding projects, should see some sort of selection indication of wells used based on count - in Popups
+
 
 class PlateApp(tk.Frame):
 

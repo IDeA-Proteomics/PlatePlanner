@@ -67,7 +67,6 @@ class AskNewPlate(tk.Toplevel):
         return
 
 
-### TODO :  Deal with the color issue... Whole program...
 class AskNewProject(tk.Toplevel):
 
     def setup(self, selection):
@@ -126,7 +125,6 @@ class AskNewProject(tk.Toplevel):
 
         return
     
-    ### TODO:  Should highlight the selected number of wells and indicate fit
     def onSelectionChange(self, selection):
 
         self.setup(selection)   
