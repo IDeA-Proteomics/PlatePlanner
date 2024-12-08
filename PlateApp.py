@@ -243,7 +243,7 @@ class PlateApp(tk.Frame):
     def redrawList(self):
         for widget in self.proj_list_frame.winfo_children():
             widget.destroy()
-        for proj in self.plate.projects:
+        for proj in {p for plate in self.plates for p in plate.projects}:
             label = self.createProjectLabel(self.proj_list_frame, proj)
             label.pack(side=tk.TOP)
         
