@@ -99,6 +99,7 @@ class PlateApp(tk.Frame):
 
         self.editmenu = Menu(self.menubar, tearoff=0)
         self.editmenu.add_command(label="Add Plate", command=self.editmenu_add_plate) 
+        self.editmenu.add_command(label="Add From File", command=self.editmenu_add_from_file) 
 
 
         self.menubar.add_cascade(label="File", menu=self.filemenu)
@@ -139,16 +140,22 @@ class PlateApp(tk.Frame):
     def editmenu_add_plate(self):
         asker = Popups.AskNewPlate(self.root_window)
         self.wait_window(asker)
-        rows = 8
-        cols = 12
         if asker.rows and asker.cols:
             rows = asker.rows
             cols = asker.cols 
             vertical = asker.vertical           
-        self.plates.append(Plate(rows=rows, columns=cols, vertical=vertical))
+            self.addPlate(Plate(rows=rows, columns=cols, vertical=vertical))
+        return
+    
+    def editmenu_add_from_file(self):
+        self.loadFromFile(True)
+        return
+        
+    
+    def addPlate(self, plate):
+        self.plates.append(plate)
         self.resetPlates()
         self.redrawList()
-
         return
 
 
@@ -216,11 +223,15 @@ class PlateApp(tk.Frame):
         if filename:
             Plate.saveToFile(filename, self.plates)
     
-    def loadFromFile(self):
+    def loadFromFile(self, add=False):
         filename = filedialog.askopenfilename(parent=self.root_window, title="Open Plate File", filetypes=(("Plate File", "*.plate"),("All Files", "*.*")))
         if filename:
             try:
-                self.plates = Plate.loadFromFile(filename)
+                if add:
+                    for plate in Plate.loadFromFile(filename):
+                        self.plates.append(plate)
+                else:
+                    self.plates = Plate.loadFromFile(filename)
                 self.redrawList()
                 self.resetPlates()
             except DuplicateEntryException:
