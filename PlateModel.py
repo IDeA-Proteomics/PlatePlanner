@@ -68,7 +68,7 @@ class Plate(OrderedDict):
     
     @property
     def number_of_wells(self):
-        return (self.rows * self.columns) + 1
+        return (self.rows * self.columns)
     
     @property
     def positions(self):
@@ -98,14 +98,17 @@ class Plate(OrderedDict):
         return [sample for sample in self.data.values()]
 
     def addProject(self, project, start_pos):
-        start = self.position_string_list.index(start_pos.label)
+        start = start_pos.index
+        if not start + project.num <= self.number_of_wells:
+            raise NotEnoughWellsException(project.num, self.number_of_wells - start)
         wells = self.position_string_list[start:start + project.num]
-        if all((self.data[well] == None for well in wells)) and start + project.num < self.number_of_wells:
+        if all((self.data[well] == None for well in wells)):
             self.projects.append(project)
             for well, sample in list(zip(wells, project.samples)):
-                self.data[well] = sample
+                self[well] = sample
         else:
-            raise NotEnoughWellsException
+            not_free = [well for well in wells if self[well] != None][0]
+            raise WellNotFreeException(not_free)
 
     def position_from_index(self, idx):
         row = row_letters.index(self.position_string_list[idx][:1])

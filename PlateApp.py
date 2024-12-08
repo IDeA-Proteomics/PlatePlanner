@@ -243,8 +243,11 @@ class PlateApp(tk.Frame):
                 plate.addProject(proj, pos)
                 self.redrawList()
                 self.getImage(plate).redrawSamples()
-        except (WellNotFreeException, NotEnoughWellsException):
-            messagebox.showerror("Error", "Project will not fit!")
+        except WellNotFreeException as e:
+            messagebox.showerror("Error", "Project will not fit!\n First occupied well - " + e.message)
+        except NotEnoughWellsException as e:
+            messagebox.showerror("Error", "Not Enough Wells\n" + e.message)
+        
 
         return
     
