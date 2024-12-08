@@ -88,10 +88,10 @@ class PlateWidget(tk.Frame):
     def draw(self):
 
 
-        self.canvas = tk.Canvas(self, width= + self.w, height= + self.h, bg='black')
+        self.canvas = tk.Canvas(self, width=  self.w, height=  self.h + 30, bg='black')
         self.canvas.create_polygon(self.x, self.y, 
-                                   self.x, self.y + self.h, 
-                                   self.x + self.w, self.y + self.h, 
+                                   self.x, self.y + self.h + 30, 
+                                   self.x + self.w, self.y + self.h + 30, 
                                    self.x + self.w, self.y, 
                                    fill='white')
 
@@ -103,12 +103,15 @@ class PlateWidget(tk.Frame):
 
         inset_x = math.floor((self.w - ((self.plate.columns)* self.well_size)) / 2)
 
+        text_height = inset_x / 3
+
         self.start_x = self.x + inset_x
-        self.start_y = self.y + inset_y
+        self.start_y = self.y + inset_y + text_height
         self.end_x = self.start_x + (self.w - (2 * inset_x))
         self.end_y = self.start_y + (self.h - (2 * inset_y))
 
-        text_height = inset_x / 3
+        
+        self.canvas.create_text(self.x, self.end_y, text=self.plate.name, font=('Arial', int(text_height)), anchor=tk.NW)
         for i in range(self.plate.columns):            
             xpos = self.start_x + (i * self.well_size) + (self.well_size / 2)
             ypos = self.start_y

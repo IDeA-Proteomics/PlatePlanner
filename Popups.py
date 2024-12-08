@@ -4,7 +4,7 @@ from PlateModel import Position
 
 class LabeledEntry(tk.Frame):
 
-    def __init__(self, parent, text):
+    def __init__(self, parent, text, initial = None):
         self.parent = parent
         tk.Frame.__init__(self, self.parent)
         self.text = text
@@ -12,7 +12,7 @@ class LabeledEntry(tk.Frame):
         self.label = tk.Label(self, text=self.text)
         self.label.pack(side=tk.LEFT, anchor=tk.E)
 
-        self.entry_text = tk.StringVar(value = "")
+        self.entry_text = tk.StringVar(value = "" if initial is None else initial)
         self.entry = tk.Entry(self, width=25, textvariable=self.entry_text)
         self.entry.pack(side=tk.LEFT, anchor=tk.W)
 
@@ -30,15 +30,21 @@ class AskNewPlate(tk.Toplevel):
     def __init__(self, parent):
         self.parent = parent
         tk.Toplevel.__init__(self, self.parent)
+        self.name = None
         self.cols = None
         self.rows = None
         self.vertical = True
+        self.count = 0
 
         values = ["8x12", "4x6"]
         orients = ["Vertical", "Horizontal"]
 
         self.frame = tk.Frame(self)
         self.frame.pack()
+
+
+        self.name_entry = LabeledEntry(self.frame, text="Name", initial=f"Plate_{self.count+1}")
+        self.name_entry.pack()
 
         self.rowVar = tk.IntVar(value=8)
         self.colVar = tk.IntVar(value=12)
@@ -59,6 +65,10 @@ class AskNewPlate(tk.Toplevel):
         return
 
     def onOK(self):
+        self.count += 1
+        self.name = self.name_entry.get()
+        if self.name == "":
+            self.name = f"Plate_{self.count}"
         result = self.sizeVar.get()
         self.rows = 4 if result == "4x6" else 8
         self.cols = 6 if result == "4x6" else 12

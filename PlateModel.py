@@ -60,8 +60,9 @@ color_list = ['red', 'orange', 'yellow', 'green', 'purple', 'cyan', 'magenta', '
 
 class Plate(OrderedDict):
 
-    def __init__(self, rows, columns, vertical=True):
+    def __init__(self, name, rows, columns, vertical=True):
         super().__init__()
+        self.name = name
         self.rows = rows
         self.columns = columns
         self.vertical = vertical
@@ -140,7 +141,7 @@ class Plate(OrderedDict):
         #     for plate in plates:
         #         Plate.outputCSV(writer, plate)
         # else:
-        row = ['Index', 'Position', 'Project', 'Sample', 'Number', str(plate.rows), str(plate.columns), str(plate.vertical)]
+        row = ['Index', 'Position', 'Project', 'Sample', 'Number', str(plate.rows), str(plate.columns), str(plate.vertical), plate.name]
         writer.writerow(row)
         idx = 0
         for (well, sample) in plate.data.items():
@@ -172,22 +173,23 @@ class Plate(OrderedDict):
             readList = list(reader)
 
             def getRCV(line):
+                n = line[8] if len(line)>8 else "Unnamed Plate"
                 r = int(line[5])
                 c = int(line[6])
                 v = False if line[7] == 'False' else True
-                return (r, c, v)
+                return (n, r, c, v)
 
             plates = []
-            r, c, v = getRCV(readList[0])
-            newPlate = Plate(r, c, v)
+            n, r, c, v = getRCV(readList[0])
+            newPlate = Plate(n, r, c, v)
 
             pcount = 0
 
             for line in list(readList)[1:]:
                 if line[0] == 'Index':
                     plates.append(newPlate)
-                    r, c, v = getRCV(line)
-                    newPlate = Plate(r, c, v)
+                    n, r, c, v = getRCV(line)
+                    newPlate = Plate(n, r, c, v)
                     continue
                 position = line[1]
                 proj_name = line[2]
@@ -231,7 +233,7 @@ class Plate(OrderedDict):
                 bottomx = bottomx + platew + 10
             bottomy = A4[1] - 50 - plateh
             if i % 2:
-                bottomy = bottomy - plateh - 10
+                bottomy = bottomy - plateh - 25
 
             Plate.drawPlate(c, plate, (bottomx, bottomy), plateh, platew)
         
@@ -261,6 +263,8 @@ class Plate(OrderedDict):
         if height > (1/ratio) * width:
             height = math.floor((1/ratio) * width)
 
+        canvas.setFont("Helvetica", 15)
+        canvas.drawString(bottom_left[0], bottom_left[1] + 5, plate.name)
         canvas.rect(bottom_left[0], bottom_left[1], width, height, fill=0)
         inset_y = math.floor(height/10)
         well_size = math.floor((height - (2 * inset_y)) / (plate.rows))

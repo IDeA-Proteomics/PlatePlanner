@@ -27,7 +27,7 @@ class PlateApp(tk.Frame):
 
         # self.root_window.report_callback_exception = self.exceptionHandler
 
-        self.plates = [Plate(rows=8, columns=12)]
+        self.plates = [Plate("OG Plate", rows=8, columns=12)]
 
         self.selected_position = (self.plates[0], None)
         self.selectionChangeListeners = []
@@ -119,10 +119,11 @@ class PlateApp(tk.Frame):
         rows = 8
         cols = 12
         if asker.rows and asker.cols:
+            name = asker.name
             rows = asker.rows
             cols = asker.cols 
             vertical = asker.vertical           
-        self.plates = [Plate(rows=rows, columns=cols, vertical=vertical)]
+        self.plates = [Plate(name = name, rows=rows, columns=cols, vertical=vertical)]
         self.resetPlates()
         self.redrawList()
         return
@@ -146,10 +147,11 @@ class PlateApp(tk.Frame):
         asker = Popups.AskNewPlate(self.root_window)
         self.wait_window(asker)
         if asker.rows and asker.cols:
+            name = asker.name
             rows = asker.rows
             cols = asker.cols 
             vertical = asker.vertical           
-            self.addPlate(Plate(rows=rows, columns=cols, vertical=vertical))
+            self.addPlate(Plate(name=name, rows=rows, columns=cols, vertical=vertical))
         return
     
     def editmenu_add_from_file(self):
@@ -248,6 +250,8 @@ class PlateApp(tk.Frame):
     
     def askNewProject(self):
         colors = [color for color in color_list if color not in [proj.color for proj in self.projects]]
+        if len(colors) == 0:
+            colors = color_list
         asker = Popups.AskNewProject(self.root_window, self.selected_position, colors)
         # self.plate_image.clearSelection()
         self.selectionChangeListeners.append(asker.onSelectionChange)
