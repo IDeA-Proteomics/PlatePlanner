@@ -67,22 +67,31 @@ class AskNewPlate(tk.Toplevel):
         return
 
 
-
+### TODO :  Deal with the color issue... Whole program...
 class AskNewProject(tk.Toplevel):
 
-    def __init__(self, parent, plate, colors, selection=None):
+    def setup(self, selection):
+        self.plate = selection[0]        
+        self.position_list = [pos.label for pos in self.plate.getFreeWells()]
+        self.selection_pos = selection[1] if selection[1] is not None and selection[1].label in self.position_list else None
+        self.start_selection = self.position_list[0] if self.selection_pos is None else self.selection_pos.label
+        self.start_position_var.set(self.start_selection)
+
+        return
+
+
+    def __init__(self, parent, selection, colors):
         self.parent = parent
         tk.Toplevel.__init__(self, self.parent)
 
-        self.plate = plate
+        self.start_position_var = tk.StringVar(value = "")
+        self.setup(selection)
+        
         self.name = None
         self.number = None
         self.position = None
         self.color = None
 
-        self.position_list = [pos.label for pos in self.plate.getFreeWells()]
-        self.selection = selection
-        self.start_selection = self.position_list[0] if not selection or selection[0].label not in self.position_list else selection[0].label
 
         self.frame = tk.Frame(self)
 
@@ -95,9 +104,8 @@ class AskNewProject(tk.Toplevel):
         self.number_entry = LabeledEntry(self.frame, text="Number")
         self.number_entry.set(str(len(selection)))
         self.number_entry.pack()
-
         
-        self.start_position_var = tk.StringVar(value = self.start_selection)
+        
         self.start_combo = ttk.Combobox(self.frame, textvariable=self.start_position_var, values=self.position_list, state='readonly', width=10)
         self.start_combo.pack()
 
@@ -118,14 +126,10 @@ class AskNewProject(tk.Toplevel):
 
         return
     
+    ### TODO:  Should highlight the selected number of wells and indicate fit
     def onSelectionChange(self, selection):
 
-        self.selection = selection
-
-        self.start_selection = self.position_list[0] if not self.selection or self.selection[0].label not in self.position_list else self.selection[0].label
-        self.start_position_var.set(self.start_selection)
-
-        self.number_entry.set(str(len(self.selection)))        
+        self.setup(selection)   
 
         return
 
@@ -136,13 +140,6 @@ class AskNewProject(tk.Toplevel):
         self.position = self.plate.position_from_string(self.start_position_var.get())
         self.color = self.color_var.get()
         self.destroy()
-
-    def updateSelection(self):
-
-
-
-
-        return
 
 
 class ExceptionDialog():

@@ -65,6 +65,10 @@ class PlateApp(tk.Frame):
 
         return
     
+    @property
+    def projects(self):
+        return {project for plate in self.plates for project in plate.projects}
+    
     @property 
     def plate_count(self):
         return len(self.plates)
@@ -216,6 +220,10 @@ class PlateApp(tk.Frame):
                 self.getImage(self.selected_position[0]).wells[self.selected_position[1].index].select(False)
             self.selected_position = (plate, position)
             well.select(True)
+        
+        if self.selectionChangeListeners:
+            for listener in self.selectionChangeListeners:
+                listener(self.selected_position)
 
         return
     
@@ -230,36 +238,36 @@ class PlateApp(tk.Frame):
 
     def onAdd(self):
         try:
-            proj, pos = self.askNewProject()
+            proj, plate, pos = self.askNewProject()
             if proj:
-                self.plate.addProject(proj, pos)
+                plate.addProject(proj, pos)
+                self.redrawList()
+                self.getImage(plate).redrawSamples()
         except (WellNotFreeException, NotEnoughWellsException):
             messagebox.showerror("Error", "Project will not fit!")
 
-        self.redrawList()
-        self.plate_image.redrawSamples()
         return
     
     def redrawList(self):
         for widget in self.proj_list_frame.winfo_children():
             widget.destroy()
-        for proj in {p for plate in self.plates for p in plate.projects}:
+        for proj in self.projects:
             label = self.createProjectLabel(self.proj_list_frame, proj)
             label.pack(side=tk.TOP)
         
         return
     
     def askNewProject(self):
-        colors = [color for color in color_list if color not in [proj.color for proj in self.plate.projects]]
-        asker = Popups.AskNewProject(self.root_window, self.plate, colors, self.selected_positions)
-        self.plate_image.clearSelection()
+        colors = [color for color in color_list if color not in [proj.color for proj in self.projects]]
+        asker = Popups.AskNewProject(self.root_window, self.selected_position, colors)
+        # self.plate_image.clearSelection()
         self.selectionChangeListeners.append(asker.onSelectionChange)
         self.wait_window(asker)
         self.selectionChangeListeners.remove(asker.onSelectionChange)
         if asker.name and asker.number:
-            rv = (Project(name=asker.name, num_samples=asker.number, color=asker.color), asker.position)
+            rv = (Project(name=asker.name, num_samples=asker.number, color=asker.color), asker.plate, asker.position)
         else:
-            rv = (None, None)
+            rv = (None, None, None)
 
         return rv
     
