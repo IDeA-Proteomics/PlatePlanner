@@ -26,10 +26,7 @@ class PlateApp(tk.Frame):
 
         self.plates = [Plate(rows=8, columns=12), Plate(rows=8, columns=12), Plate(rows=4, columns=6), Plate(rows=4, columns=6)]
 
-        
-
-
-        self.selected_positions = []
+        self.selected_position = (self.plates[0], None)
         self.selectionChangeListeners = []
 
         self.main_frame = tk.Frame(self)
@@ -51,7 +48,7 @@ class PlateApp(tk.Frame):
             platey = 10
             platew = 900 if self.plate_count < 3 else 450
             platef = 0 if i<2 else 1
-            self.plate_images.append(PlateImage.PlateWidget(self.plate_frames[platef], plate=self.plates[i], platex=platex, platey=platey, platew=platew, onSelectionChange=self.onPlateSelectionChange))
+            self.plate_images.append(PlateImage.PlateWidget(self.plate_frames[platef], plate=self.plates[i], platex=platex, platey=platey, platew=platew, onWellClickHandler=self.onWellClick))
         for i in range(len(self.plate_images)):
             self.plate_images[i].pack(side=tk.TOP, anchor=tk.NW)
 
@@ -71,6 +68,12 @@ class PlateApp(tk.Frame):
     @property 
     def plate_count(self):
         return len(self.plates)
+    
+    def getImage(self, plate):
+        for i, p in enumerate(self.plates):
+            if p is plate:
+                return self.plate_images[i]
+        return None
 
     def createMenu(self):
 
@@ -203,14 +206,27 @@ class PlateApp(tk.Frame):
 
         return frame
 
-    def onPlateSelectionChange(self, selected_positions):
-
-        self.selected_positions = selected_positions
-        if self.selectionChangeListeners:
-            for listener in self.selectionChangeListeners:
-                listener(self.selected_positions)
+    def onWellClick(self, plate, position):
+        well = self.getImage(plate).wells[position.index]
+        if well.selected:
+            self.selected_position = (plate, None)
+            well.select(False)
+        else:
+            if self.selected_position[1] is not None:
+                self.getImage(self.selected_position[0]).wells[self.selected_position[1].index].select(False)
+            self.selected_position = (plate, position)
+            well.select(True)
 
         return
+    
+    # def onPlateSelectionChange(self, selected_positions):
+
+    #     self.selected_positions = selected_positions
+    #     if self.selectionChangeListeners:
+    #         for listener in self.selectionChangeListeners:
+    #             listener(self.selected_positions)
+
+    #     return
 
     def onAdd(self):
         try:
