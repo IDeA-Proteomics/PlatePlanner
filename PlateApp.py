@@ -26,9 +26,7 @@ class PlateApp(tk.Frame):
 
         self.plates = [Plate(rows=8, columns=12), Plate(rows=8, columns=12), Plate(rows=4, columns=6), Plate(rows=4, columns=6)]
 
-        @property 
-        def plate_count(self):
-            return len(self.plates)
+        
 
 
         self.selected_positions = []
@@ -40,7 +38,7 @@ class PlateApp(tk.Frame):
         self.plate_outer_frame = tk.Frame(self.main_frame)
         self.plate_outer_frame.pack(side=tk.LEFT)
 
-        self.plate_frames = [tk.Frame(self.plate_outer_frame) for _ in range(2 if len(self.plates)>2 else 1)]
+        self.plate_frames = [tk.Frame(self.plate_outer_frame) for _ in range(2 if self.plate_count > 2 else 1)]
         for f in self.plate_frames:
             f.pack(side=tk.LEFT)
 
@@ -48,10 +46,10 @@ class PlateApp(tk.Frame):
         self.proj_frame.pack(side=tk.LEFT)
 
         self.plate_images = []
-        for i in range(min(4, len(self.plates))):
+        for i in range(min(4, self.plate_count)):
             platex = 10
             platey = 10
-            platew = 900 if len(self.plates) < 3 else 450
+            platew = 900 if self.plate_count < 3 else 450
             platef = 0 if i<2 else 1
             self.plate_images.append(PlateImage.PlateWidget(self.plate_frames[platef], plate=self.plates[i], platex=platex, platey=platey, platew=platew, onSelectionChange=self.onPlateSelectionChange))
         for i in range(len(self.plate_images)):
@@ -69,6 +67,10 @@ class PlateApp(tk.Frame):
         self.createMenu()
 
         return
+    
+    @property 
+    def plate_count(self):
+        return len(self.plates)
 
     def createMenu(self):
 
