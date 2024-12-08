@@ -24,7 +24,7 @@ class PlateApp(tk.Frame):
 
         # self.root_window.report_callback_exception = self.exceptionHandler
 
-        self.plates = [Plate(rows=8, columns=12), Plate(rows=8, columns=12), Plate(rows=4, columns=6), Plate(rows=4, columns=6)]
+        self.plates = [Plate(rows=8, columns=12)]
 
         self.selected_position = (self.plates[0], None)
         self.selectionChangeListeners = []
@@ -33,24 +33,12 @@ class PlateApp(tk.Frame):
         self.main_frame.pack(side = tk.TOP)
 
         self.plate_outer_frame = tk.Frame(self.main_frame)
-        self.plate_outer_frame.pack(side=tk.LEFT)
-
-        self.plate_frames = [tk.Frame(self.plate_outer_frame) for _ in range(2 if self.plate_count > 2 else 1)]
-        for f in self.plate_frames:
-            f.pack(side=tk.LEFT)
+        self.plate_outer_frame.pack(side=tk.LEFT)        
 
         self.proj_frame = tk.Frame(self.main_frame)
         self.proj_frame.pack(side=tk.LEFT)
 
-        self.plate_images = []
-        for i in range(min(4, self.plate_count)):
-            platex = 10
-            platey = 10
-            platew = 900 if self.plate_count < 3 else 450
-            platef = 0 if i<2 else 1
-            self.plate_images.append(PlateImage.PlateWidget(self.plate_frames[platef], plate=self.plates[i], platex=platex, platey=platey, platew=platew, onWellClickHandler=self.onWellClick))
-        for i in range(len(self.plate_images)):
-            self.plate_images[i].pack(side=tk.TOP, anchor=tk.NW)
+        self.resetPlates()
 
         self.add_button = tk.Button(self.proj_frame, text="Add", command=self.onAdd)
         self.add_button.pack(side=tk.TOP)
@@ -62,6 +50,27 @@ class PlateApp(tk.Frame):
         self.proj_list_frame.pack(side=tk.TOP)
 
         self.createMenu()
+
+        return
+    
+    def resetPlates(self):
+        for widget in self.plate_outer_frame.winfo_children():
+            widget.destroy()
+        self.plate_frames = []
+        self.plate_images = []
+
+        self.plate_frames = [tk.Frame(self.plate_outer_frame) for _ in range(2 if self.plate_count > 2 else 1)]
+        for f in self.plate_frames:
+            f.pack(side=tk.LEFT)
+
+        for i in range(min(4, self.plate_count)):
+            platex = 10
+            platey = 10
+            platew = 900 if self.plate_count == 1 else 600 if self.plate_count < 3 else 450
+            platef = 0 if i<2 else 1
+            self.plate_images.append(PlateImage.PlateWidget(self.plate_frames[platef], plate=self.plates[i], platex=platex, platey=platey, platew=platew, onWellClickHandler=self.onWellClick))
+        for i in range(len(self.plate_images)):
+            self.plate_images[i].pack(side=tk.TOP, anchor=tk.NW)
 
         return
     
@@ -86,10 +95,14 @@ class PlateApp(tk.Frame):
         self.filemenu = Menu(self.menubar, tearoff=0)
         self.filemenu.add_command(label="New", command=self.filemenu_new)
         self.filemenu.add_command(label="Open", command=self.filemenu_open)
-        self.filemenu.add_command(label="Save", command=self.filemenu_save)        
+        self.filemenu.add_command(label="Save", command=self.filemenu_save)       
+
+        self.editmenu = Menu(self.menubar, tearoff=0)
+        self.editmenu.add_command(label="Add Plate", command=self.editmenu_add_plate) 
 
 
         self.menubar.add_cascade(label="File", menu=self.filemenu)
+        self.menubar.add_cascade(label="Edit", menu=self.editmenu)
         self.menubar.add_command(label="To PDF", command=self.filemenu_savepdf)
 
         self.root_window.config(menu=self.menubar)
@@ -106,8 +119,8 @@ class PlateApp(tk.Frame):
             cols = asker.cols 
             vertical = asker.vertical           
         self.plates = [Plate(rows=rows, columns=cols, vertical=vertical)]
+        self.resetPlates()
         self.redrawList()
-        self.plate_image.resetPlate(self.plate)
         return
 
     def filemenu_open(self):
@@ -120,6 +133,22 @@ class PlateApp(tk.Frame):
 
     def filemenu_savepdf(self):
         self.saveImage()
+        return
+    
+
+    def editmenu_add_plate(self):
+        asker = Popups.AskNewPlate(self.root_window)
+        self.wait_window(asker)
+        rows = 8
+        cols = 12
+        if asker.rows and asker.cols:
+            rows = asker.rows
+            cols = asker.cols 
+            vertical = asker.vertical           
+        self.plates.append(Plate(rows=rows, columns=cols, vertical=vertical))
+        self.resetPlates()
+        self.redrawList()
+
         return
 
     def saveImage(self):
