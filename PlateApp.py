@@ -24,21 +24,38 @@ class PlateApp(tk.Frame):
 
         # self.root_window.report_callback_exception = self.exceptionHandler
 
-        self.plate = Plate(rows=8, columns=12)
+        self.plates = [Plate(rows=8, columns=12), Plate(rows=8, columns=12), Plate(rows=4, columns=6), Plate(rows=4, columns=6)]
+
+        @property 
+        def plate_count(self):
+            return len(self.plates)
+
+
         self.selected_positions = []
         self.selectionChangeListeners = []
 
         self.main_frame = tk.Frame(self)
         self.main_frame.pack(side = tk.TOP)
 
-        self.plate_frame = tk.Frame(self.main_frame)
-        self.plate_frame.pack(side=tk.LEFT)
+        self.plate_outer_frame = tk.Frame(self.main_frame)
+        self.plate_outer_frame.pack(side=tk.LEFT)
+
+        self.plate_frames = [tk.Frame(self.plate_outer_frame) for _ in range(2 if len(self.plates)>2 else 1)]
+        for f in self.plate_frames:
+            f.pack(side=tk.LEFT)
 
         self.proj_frame = tk.Frame(self.main_frame)
         self.proj_frame.pack(side=tk.LEFT)
 
-        self.plate_image = PlateImage.PlateWidget(self.plate_frame, plate=self.plate, platex=10, platey=10, platew=450, onSelectionChange=self.onPlateSelectionChange)
-        self.plate_image.pack()
+        self.plate_images = []
+        for i in range(min(4, len(self.plates))):
+            platex = 10
+            platey = 10
+            platew = 900 if len(self.plates) < 3 else 450
+            platef = 0 if i<2 else 1
+            self.plate_images.append(PlateImage.PlateWidget(self.plate_frames[platef], plate=self.plates[i], platex=platex, platey=platey, platew=platew, onSelectionChange=self.onPlateSelectionChange))
+        for i in range(len(self.plate_images)):
+            self.plate_images[i].pack(side=tk.TOP, anchor=tk.NW)
 
         self.add_button = tk.Button(self.proj_frame, text="Add", command=self.onAdd)
         self.add_button.pack(side=tk.TOP)
@@ -79,7 +96,7 @@ class PlateApp(tk.Frame):
             rows = asker.rows
             cols = asker.cols 
             vertical = asker.vertical           
-        self.plate = Plate(rows=rows, columns=cols, vertical=vertical)
+        self.plates = [Plate(rows=rows, columns=cols, vertical=vertical)]
         self.redrawList()
         self.plate_image.resetPlate(self.plate)
         return
@@ -99,12 +116,6 @@ class PlateApp(tk.Frame):
     def saveImage(self):
         filename = filedialog.asksaveasfilename(parent=self.root_window, title="Save Plate Image as PDF", defaultextension='.pdf', filetypes=(("PDF File", "*.pdf"),("All Files", "*.*")))
         if filename:
-
-            # ### Window coords for the screen grab
-            # x = self.root_window.winfo_rootx() + self.plate_image.canvas.winfo_x()
-            # y = self.root_window.winfo_rooty() + self.plate_image.canvas.winfo_y()
-            # x1 = x + self.plate_image.canvas.winfo_width()
-            # y1 = y + self.plate_image.canvas.winfo_height()
             ### coords for image on PDF
             image_height = (A4[0] - 30) / self.plate_image.canvas.winfo_width() * self.plate_image.canvas.winfo_height()
 

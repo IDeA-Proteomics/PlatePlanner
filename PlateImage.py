@@ -85,7 +85,7 @@ class PlateWidget(tk.Frame):
     def draw(self):
 
 
-        self.canvas = tk.Canvas(self, width=(self.x * 2) + self.w, height=(self.y * 2) + self.h, bg='black')
+        self.canvas = tk.Canvas(self, width= + self.w, height= + self.h, bg='black')
         self.canvas.create_polygon(self.x, self.y, 
                                    self.x, self.y + self.h, 
                                    self.x + self.w, self.y + self.h, 
