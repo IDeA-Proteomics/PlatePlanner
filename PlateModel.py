@@ -27,10 +27,11 @@ class Position(object):
 
 class Sample(object):
 
-    def __init__(self, project, name, position):
+    def __init__(self, project, name, number, position):
         
         self.project = project
         self.name = name
+        self.number = number
         self.position = position
 
         return
@@ -44,13 +45,15 @@ class Project(object):
         self.num = num_samples
         self.color = color
         
-        self.samples = [Sample(project=self, name=f'Sample{i + 1}', position=None) for i in range(self.num)]
+        self.samples = [Sample(project=self, name=f'Sample{i + 1}', number= i+1, position=None) for i in range(self.num)]
 
         return
     
     def addSample(self, sample):
         self.samples.append(sample)
         self.num += 1
+        if sample.number is None:
+            sample.number = self.num
         return
 
 color_list = ['red', 'orange', 'yellow', 'green', 'purple', 'cyan', 'magenta', 'brown']
@@ -137,7 +140,7 @@ class Plate(OrderedDict):
         #     for plate in plates:
         #         Plate.outputCSV(writer, plate)
         # else:
-        row = ['Index', 'Position', 'Project', 'Sample', str(plate.rows), str(plate.columns), str(plate.vertical)]
+        row = ['Index', 'Position', 'Project', 'Sample', 'Number', str(plate.rows), str(plate.columns), str(plate.vertical)]
         writer.writerow(row)
         idx = 0
         for (well, sample) in plate.data.items():
@@ -145,7 +148,8 @@ class Plate(OrderedDict):
                 idx,
                 well,
                 sample.project.name if sample is not None else 'EMPTY',
-                sample.name if sample is not None else 'EMPTY'
+                sample.name if sample is not None else 'EMPTY',
+                sample.number if sample is not None else '-'
             ]
             writer.writerow(row)
             idx += 1
@@ -168,14 +172,10 @@ class Plate(OrderedDict):
             readList = list(reader)
 
             def getRCV(line):
-                r = int(line[4])
-                c = int(line[5])
-                v = False if line[6] == 'False' else True
+                r = int(line[5])
+                c = int(line[6])
+                v = False if line[7] == 'False' else True
                 return (r, c, v)
-
-            # r = int(readList[0][4])
-            # c = int(readList[0][5])
-            # v = False if readList[0][6] == 'False' else True
 
             plates = []
             r, c, v = getRCV(readList[0])
@@ -192,6 +192,7 @@ class Plate(OrderedDict):
                 position = line[1]
                 proj_name = line[2]
                 sample_name = line[3]
+                sample_number = line[4] if len(line) > 4 and line[4] != '-' else None
                 if sample_name != 'EMPTY' and proj_name != 'EMPTY':
                     if proj_name not in [p.name for p in newPlate.projects]:
                         newPlate.projects.append(Project(proj_name, color_list[pcount%len(color_list)]))
@@ -201,7 +202,7 @@ class Plate(OrderedDict):
                         if p.name == proj_name:
                             project = p
                             break
-                    sample = Sample(project, sample_name, newPlate.position_from_string(position))
+                    sample = Sample(project, sample_name, sample_number, newPlate.position_from_string(position))
                     project.addSample(sample)
                     newPlate[position] = sample
             plates.append(newPlate)

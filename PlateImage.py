@@ -35,7 +35,8 @@ class Well(tk.Canvas):
         fill = 'blue' if self.plate[self.position] is None else self.plate[self.position].project.color
 
         self.well = self.create_oval(self.w/2 - self.radius, self.h/2 - self.radius, self.w/2 + self.radius, self.h/2 + self.radius, fill=fill)
-        self.create_text(self.w / 2, self.h / 2, text=self.position.label, font=('Arial', int(self.radius/1.5)))
+        t = self.plate[self.position].number if self.plate[self.position] is not None else ""
+        self.create_text(self.w / 2, self.h / 2, text=t, font=('Arial', int(self.radius/1.5)))
         return
     
     def redraw(self):
@@ -106,6 +107,18 @@ class PlateWidget(tk.Frame):
         self.start_y = self.y + inset_y
         self.end_x = self.start_x + (self.w - (2 * inset_x))
         self.end_y = self.start_y + (self.h - (2 * inset_y))
+
+        text_height = inset_x / 3
+        for i in range(self.plate.columns):            
+            xpos = self.start_x + (i * self.well_size) + (self.well_size / 2)
+            ypos = self.start_y
+            self.canvas.create_text(xpos, ypos, text=str(i+1), font=('Arial', int(text_height)), anchor=tk.S)
+
+        for i in range(self.plate.rows):
+            xpos = self.start_x - (inset_x / 10)
+            ypos = self.start_y + (i * self.well_size) + (self.well_size / 2)
+            self.canvas.create_text(xpos, ypos, text="ABCDEFGH"[i], font=('Arial', int(text_height)), anchor=tk.E)
+
 
         for pos in self.plate.positions:
             well = Well(self, self.plate, pos, self.well_size, self.well_size, self.onWellClick)
