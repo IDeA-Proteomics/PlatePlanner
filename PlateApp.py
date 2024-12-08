@@ -1,15 +1,11 @@
 
-import os
-import math
+
 import PlateImage
 import Popups
-from Popups import LabeledEntry
 import tkinter as tk
 from tkinter import messagebox, filedialog, Menu
 from PlateModel import Sample, Project, Plate
 from PlateExceptions import *
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
 
 
 color_list = ['red', 'orange', 'yellow', 'green', 'purple', 'cyan', 'magenta', 'brown']
@@ -140,7 +136,9 @@ class PlateApp(tk.Frame):
         return
 
     def filemenu_savepdf(self):
-        self.saveImage()
+        filename = filedialog.asksaveasfilename(parent=self.root_window, title="Save Plate Image as PDF", defaultextension='.pdf', filetypes=(("PDF File", "*.pdf"),("All Files", "*.*")))
+        if filename:
+            Plate.saveImage(filename, self.plates)
         return
     
 
@@ -163,66 +161,6 @@ class PlateApp(tk.Frame):
         self.plates.append(plate)
         self.resetPlates()
         self.redrawList()
-        return
-
-
-    def saveImage(self):
-        filename = filedialog.asksaveasfilename(parent=self.root_window, title="Save Plate Image as PDF", defaultextension='.pdf', filetypes=(("PDF File", "*.pdf"),("All Files", "*.*")))
-        if filename:
-            ### coords for image on PDF
-            image_height = (A4[0] - 30) / self.plate_image.canvas.winfo_width() * self.plate_image.canvas.winfo_height()
-
-            c = canvas.Canvas(filename, pagesize=A4)
-            image_bottom = A4[1] - image_height - 50
-            self.drawPlate(c, (15, image_bottom), image_height, A4[1])
-
-            label_y = image_bottom
-            
-            c.setFont("Helvetica", 30)
-            for proj in self.plate.projects:
-                label_y -= 40
-                c.setFillColor(proj.color)
-                c.rect(10, label_y, c.stringWidth(proj.name), 30, stroke=0, fill=1)
-                c.setFillColor('black')
-                c.drawString(10, label_y, proj.name)
-            c.save()
-
-        return
-    
-    def drawPlate(self, canvas, bottom_left, height, width):
-
-        ratio = self.plate.columns / self.plate.rows
-
-        if width > ratio * height:
-            width = math.floor(ratio * height)
-        elif height > (1/ratio) * width:
-            height = math.floor((1/ratio) * width)
-
-        canvas.rect(bottom_left[0], bottom_left[1], width, height, fill=0)
-        inset_y = math.floor(height/10)
-        well_size = math.floor((height - (2 * inset_y)) / (self.plate.rows))
-        well_radius = math.floor(well_size * 0.45)
-        inset_x = math.floor((width - ((self.plate.columns) * well_size)) / 2)
-
-        def getWellCenter(position):
-            x = bottom_left[0] + inset_x  + (well_size * position.column) + (well_size / 2)
-            y = bottom_left[1] + height - inset_y - (well_size * position.row) - (well_size / 2)  
-            return (x,y)
-        
-        
-        txh = well_radius // 1.3
-        canvas.setFont("Helvetica", txh)
-        for well in self.plate.positions:
-            label = well.label
-            x,y = getWellCenter(well)            
-            canvas.setFillColor(self.plate[label].project.color if self.plate[label] else 'blue')
-            canvas.circle(x, y, well_radius, stroke=1, fill=1)
-            txw = canvas.stringWidth(label)
-            cx = x - (txw/2)
-            cy = y - (txh/2) * 0.92
-            canvas.setFillColor('black')
-            canvas.drawString(cx, cy, label)
-
         return
     
     def onSave(self):

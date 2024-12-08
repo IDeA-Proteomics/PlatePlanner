@@ -1,7 +1,11 @@
 
 import csv
+import math
 from PlateExceptions import *
 from collections import OrderedDict
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+
 ### Horizontal plates
 # position_string_list = [f'{c}{i+1}' for c in 'ABCDEFGH' for i in range(12)]
 
@@ -128,7 +132,7 @@ class Plate(OrderedDict):
         return self.position_from_index(idx)
 
     @classmethod
-    def outputCSV(self, writer, plate):
+    def outputCSV(cls, writer, plate):
         # if isinstance(plates, list):
         #     for plate in plates:
         #         Plate.outputCSV(writer, plate)
@@ -148,7 +152,7 @@ class Plate(OrderedDict):
         return
     
     @classmethod
-    def saveToFile(self, filename, plates):
+    def saveToFile(cls, filename, plates):
         with open(filename, 'w', newline='') as file:
             writer = csv.writer(file)
             for plate in plates:
@@ -203,3 +207,82 @@ class Plate(OrderedDict):
             plates.append(newPlate)
                     
         return plates
+    
+
+    @classmethod
+    def saveImage(cls, filename, plates):
+        count = len(plates)
+        print (count)
+        ### coords for image on PDF
+        # image_height = (A4[0] - 30) / self.plate_image.canvas.winfo_width() * self.plate_image.canvas.winfo_height()
+        total_width = A4[0] - 20
+        total_height = A4[1] - 200
+
+        platew = total_width if count == 1 else total_width * 0.66 if count == 2 else (total_width / 2) - 20
+        plateh = platew * 8/12
+
+        c = canvas.Canvas(filename, pagesize=A4)
+        # image_bottom = A4[1] - image_height - 50
+        # self.drawPlate(c, (15, image_bottom), image_height, A4[1])
+        for i, plate in enumerate(plates):
+            bottomx = 15
+            if i > 1:
+                bottomx = bottomx + platew + 10
+            bottomy = A4[1] - 50 - plateh
+            if i % 2:
+                bottomy = bottomy - plateh - 10
+
+            Plate.drawPlate(c, plate, (bottomx, bottomy), plateh, platew)
+        
+
+
+        # label_y = image_bottom
+        
+        # c.setFont("Helvetica", 30)
+        # for proj in self.plate.projects:
+        #     label_y -= 40
+        #     c.setFillColor(proj.color)
+        #     c.rect(10, label_y, c.stringWidth(proj.name), 30, stroke=0, fill=1)
+        #     c.setFillColor('black')
+        #     c.drawString(10, label_y, proj.name)
+        c.save()
+
+        return
+    
+
+    @classmethod
+    def drawPlate(cls, canvas, plate, bottom_left, height, width):
+
+        ratio = plate.columns / plate.rows
+
+        # if width > ratio * height:
+        #     width = math.floor(ratio * height)
+        if height > (1/ratio) * width:
+            height = math.floor((1/ratio) * width)
+
+        canvas.rect(bottom_left[0], bottom_left[1], width, height, fill=0)
+        inset_y = math.floor(height/10)
+        well_size = math.floor((height - (2 * inset_y)) / (plate.rows))
+        well_radius = math.floor(well_size * 0.45)
+        inset_x = math.floor((width - ((plate.columns) * well_size)) / 2)
+
+        def getWellCenter(position):
+            x = bottom_left[0] + inset_x  + (well_size * position.column) + (well_size / 2)
+            y = bottom_left[1] + height - inset_y - (well_size * position.row) - (well_size / 2)  
+            return (x,y)
+        
+        
+        txh = well_radius // 1.3
+        canvas.setFont("Helvetica", txh)
+        for well in plate.positions:
+            label = well.label
+            x,y = getWellCenter(well)            
+            canvas.setFillColor(plate[label].project.color if plate[label] else 'blue')
+            canvas.circle(x, y, well_radius, stroke=1, fill=1)
+            txw = canvas.stringWidth(label)
+            cx = x - (txw/2)
+            cy = y - (txh/2) * 0.92
+            canvas.setFillColor('black')
+            canvas.drawString(cx, cy, label)
+
+        return
