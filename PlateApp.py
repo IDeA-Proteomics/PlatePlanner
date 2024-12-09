@@ -135,6 +135,7 @@ class PlateApp(tk.Frame):
         self.editmenu = Menu(self.menubar, tearoff=0)
         self.editmenu.add_command(label="Add Plate", command=self.editmenu_add_plate) 
         self.editmenu.add_command(label="Add From File", command=self.editmenu_add_from_file) 
+        self.editmenu.add_command(label="Remove Plate", command=self.editmenu_remove_plate) 
 
 
         self.menubar.add_cascade(label="File", menu=self.filemenu)
@@ -204,6 +205,10 @@ class PlateApp(tk.Frame):
         filename = filedialog.askopenfilename(parent=self.root_window, title="Open Plate File", filetypes=(("Plate File", "*.plate"),("All Files", "*.*")))
         self.loadFromFile(filename, True)
         return
+    
+    def editmenu_remove_plate(self):
+        self.removePlate(self.selected_position[0])
+        return
         
     
     def addPlate(self, plate):
@@ -211,6 +216,15 @@ class PlateApp(tk.Frame):
         self.resetPlates()
         self.redrawList()
         return
+    
+    def removePlate(self, plate):
+        # self.plates.remove(plate)
+        for i, p in enumerate(self.plates):
+            if p is plate:
+                self.plates.pop(i)
+        self.resetPlates()
+        self.redrawList()
+        self.resetSelection()
     
     def onSave(self, filename):
         if filename:
@@ -259,6 +273,7 @@ class PlateApp(tk.Frame):
         if self.selectionChangeListeners:
             for listener in self.selectionChangeListeners:
                 listener(self.selected_position)
+
 
         return
     
@@ -328,7 +343,7 @@ def main():
 
     root = tk.Tk()
 
-    app = PlateApp(root, '/home/david/IDeA_Scripts/PlatePlanner/p1.plate')
+    app = PlateApp(root)
     app.pack()
 
     root.mainloop()
