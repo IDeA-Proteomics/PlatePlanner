@@ -55,6 +55,13 @@ class Project(object):
         if sample.number is None:
             sample.number = self.num
         return
+    
+    #### THIS DOESN'T REMOVE IT FROM THE PLATE
+    def removeSample(self, sample):
+        for i,s in enumerate(self.samples):
+            if s is sample:
+                self.samples.pop(i)
+        return
 
 color_list = ['red', 'orange', 'yellow', 'green', 'purple', 'cyan', 'magenta', 'brown']
 
@@ -84,11 +91,15 @@ class Plate(OrderedDict):
 
 
     def __setitem__(self, key, value):
+        if isinstance(key, Position):
+            key = key.label
         if key not in self.data.keys():
             raise KeyError
-        if not isinstance(value, Sample):
-            raise TypeError("Only samples can be assigned to plate wells")
+        if value is not None and not isinstance(value, Sample):
+            raise TypeError("Only samples or `None` can be assigned to plate wells")
         self.data[key] = value
+        if value is not None:
+            value.position = self.position_from_string(key)
     
     def __getitem__(self, key):
         if isinstance(key, Position):
@@ -103,7 +114,19 @@ class Plate(OrderedDict):
         return [self.position_from_string(key) for key in self.data.keys() if self.data[key] is None]
 
     def getSamples(self):
-        return [sample for sample in self.data.values()]
+        return [sample for sample in self.data.values() if sample is not None]
+    
+    def removeProject(self, project):
+        for i, p in enumerate(self.projects):
+            if p is project:
+                for s in [x for x in p.samples]:
+                    self.removeSample(s)
+                self.projects.pop(i)
+    
+    def removeSample(self, sample):
+        sample.project.removeSample(sample)
+        self[sample.position] = None
+        return
 
     def addProject(self, project, start_pos):
         start = start_pos.index
@@ -114,6 +137,8 @@ class Plate(OrderedDict):
             self.projects.append(project)
             for well, sample in list(zip(wells, project.samples)):
                 self[well] = sample
+            
+            self.projects.sort(key=lambda pr: pr.samples[0].position.index)
         else:
             not_free = [well for well in wells if self[well] != None][0]
             raise WellNotFreeException(not_free)

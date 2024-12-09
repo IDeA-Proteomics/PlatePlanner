@@ -136,6 +136,8 @@ class PlateApp(tk.Frame):
         self.editmenu.add_command(label="Add Plate", command=self.editmenu_add_plate) 
         self.editmenu.add_command(label="Add From File", command=self.editmenu_add_from_file) 
         self.editmenu.add_command(label="Remove Plate", command=self.editmenu_remove_plate) 
+        self.editmenu.add_command(label="Remove Project", command=self.editmenu_remove_project) 
+        self.editmenu.add_command(label="Remove Sample", command=self.editmenu_remove_sample) 
 
 
         self.menubar.add_cascade(label="File", menu=self.filemenu)
@@ -209,7 +211,14 @@ class PlateApp(tk.Frame):
     def editmenu_remove_plate(self):
         self.removePlate(self.selected_position[0])
         return
-        
+    
+    def editmenu_remove_sample(self):
+        self.removeSample(self.selected_position[0], self.selected_position[1])
+        return
+    
+    def editmenu_remove_project(self):
+        self.removeProject(self.selected_position[0], self.selected_position[1])
+        return        
     
     def addPlate(self, plate):
         self.plates.append(plate)
@@ -225,6 +234,23 @@ class PlateApp(tk.Frame):
         self.resetPlates()
         self.redrawList()
         self.resetSelection()
+
+    def removeSample(self, plate, position):
+        if position:
+            plate.removeSample(plate[position])
+            self.resetPlates()
+            self.redrawList()
+            self.resetSelection()
+        return
+    
+    def removeProject(self, plate, position):
+        if position:        
+            plate.removeProject(plate[position].project)
+            self.resetPlates()
+            self.redrawList()
+            self.resetSelection()
+        return
+
     
     def onSave(self, filename):
         if filename:
@@ -343,7 +369,7 @@ def main():
 
     root = tk.Tk()
 
-    app = PlateApp(root)
+    app = PlateApp(root, '/home/david/IDeA_Scripts/TestData/testPlate.plate')
     app.pack()
 
     root.mainloop()
