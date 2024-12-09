@@ -27,12 +27,12 @@ class Position(object):
 
 class Sample(object):
 
-    def __init__(self, project, name, number, position):
+    def __init__(self, project, name, number):
         
         self.project = project
         self.name = name
         self.number = number
-        self.position = position
+        self.position = None
 
         return
     
@@ -42,18 +42,20 @@ class Project(object):
     def __init__(self, name, color, num_samples = 0):
 
         self.name = name
-        self.num = num_samples
         self.color = color
         
-        self.samples = [Sample(project=self, name=f'Sample{i + 1}', number= i+1, position=None) for i in range(self.num)]
+        self.samples = [Sample(project=self, name=f'Sample{i + 1}', number= i+1) for i in range(num_samples)]
 
         return
     
+    @property
+    def sample_count(self):
+        return len(self.samples)
+    
     def addSample(self, sample):
         self.samples.append(sample)
-        self.num += 1
         if sample.number is None:
-            sample.number = self.num
+            sample.number = self.sample_count
         return
     
     #### THIS DOESN'T REMOVE IT FROM THE PLATE
@@ -116,6 +118,7 @@ class Plate(OrderedDict):
     def getSamples(self):
         return [sample for sample in self.data.values() if sample is not None]
     
+    
     def removeProject(self, project):
         for i, p in enumerate(self.projects):
             if p is project:
@@ -123,8 +126,8 @@ class Plate(OrderedDict):
                     self.removeSample(s)
                 self.projects.pop(i)
     
+    ### Only removes from plate, not from the project
     def removeSample(self, sample):
-        sample.project.removeSample(sample)
         self[sample.position] = None
         return
 
@@ -137,7 +140,7 @@ class Plate(OrderedDict):
             self.projects.append(project)
             for well, sample in list(zip(wells, project.samples)):
                 self[well] = sample
-            
+            ### sort projects in the order they appear on plate
             self.projects.sort(key=lambda pr: pr.samples[0].position.index)
         else:
             not_free = [well for well in wells if self[well] != None][0]
@@ -160,12 +163,9 @@ class Plate(OrderedDict):
         idx = self.position_string_list.index(instr)
         return self.position_from_index(idx)
 
+    ### Output one plate to CSV file writer already open
     @classmethod
     def outputCSV(cls, writer, plate):
-        # if isinstance(plates, list):
-        #     for plate in plates:
-        #         Plate.outputCSV(writer, plate)
-        # else:
         row = ['Index', 'Position', 'Project', 'Sample', 'Number', str(plate.rows), str(plate.columns), str(plate.vertical), plate.name]
         writer.writerow(row)
         idx = 0
@@ -181,6 +181,7 @@ class Plate(OrderedDict):
             idx += 1
         return
     
+    ### Save list of plates to csv file
     @classmethod
     def saveToFile(cls, filename, plates):
         with open(filename, 'w', newline='') as file:
@@ -188,48 +189,48 @@ class Plate(OrderedDict):
             for plate in plates:
                 Plate.outputCSV(writer, plate)            
         return
-        
+    
+    ### load plate file and return list of plate objects
     @classmethod
     def loadFromFile(cls, filename):
+        plates = []  
+        pcount = 0
         
         with open(filename, 'r') as file:
             reader = csv.reader(file)
-
             readList = list(reader)
 
-            def getRCV(line):
+            def getNRCV(line):
                 n = line[8] if len(line)>8 else "Unnamed Plate"
                 r = int(line[5])
                 c = int(line[6])
                 v = False if line[7] == 'False' else True
                 return (n, r, c, v)
 
-            plates = []
-            n, r, c, v = getRCV(readList[0])
+            n, r, c, v = getNRCV(readList[0])
             newPlate = Plate(n, r, c, v)
 
-            pcount = 0
-
             for line in list(readList)[1:]:
+                ### detect start of new plate
                 if line[0] == 'Index':
                     plates.append(newPlate)
-                    n, r, c, v = getRCV(line)
+                    n, r, c, v = getNRCV(line)
                     newPlate = Plate(n, r, c, v)
                     continue
                 position = line[1]
                 proj_name = line[2]
                 sample_name = line[3]
-                sample_number = line[4] if len(line) > 4 and line[4] != '-' else None
+                ### Some plate files don't have the sample number
+                sample_number = int(line[4]) if len(line) > 4 and line[4] != '-' else None
                 if sample_name != 'EMPTY' and proj_name != 'EMPTY':
                     if proj_name not in [p.name for p in newPlate.projects]:
                         newPlate.projects.append(Project(proj_name, color_list[pcount%len(color_list)]))
                         pcount += 1
-                        project = None
                     for p in newPlate.projects:
                         if p.name == proj_name:
                             project = p
                             break
-                    sample = Sample(project, sample_name, sample_number, newPlate.position_from_string(position))
+                    sample = Sample(project, sample_name, sample_number)
                     project.addSample(sample)
                     newPlate[position] = sample
             plates.append(newPlate)
@@ -241,8 +242,6 @@ class Plate(OrderedDict):
     @classmethod
     def saveImage(cls, filename, plates):
         count = len(plates)
-        ### coords for image on PDF
-        # image_height = (A4[0] - 30) / self.plate_image.canvas.winfo_width() * self.plate_image.canvas.winfo_height()
         total_width = A4[0] - 20
         total_height = A4[1] - 200
 
@@ -251,8 +250,6 @@ class Plate(OrderedDict):
         text_box_height = 60
 
         c = canvas.Canvas(filename, pagesize=A4)
-        # image_bottom = A4[1] - image_height - 50
-        # self.drawPlate(c, (15, image_bottom), image_height, A4[1])
         for i, plate in enumerate(plates):
             bottomx = 15
             if i > 1:
@@ -263,18 +260,7 @@ class Plate(OrderedDict):
 
             Plate.drawPlate(c, plate, (bottomx, bottomy), plateh, platew)
             Plate.labelPlate(c, plate, (bottomx, bottomy-text_box_height), text_box_height, platew)
-        
 
-
-        # label_y = image_bottom
-        
-        # c.setFont("Helvetica", 30)
-        # for proj in self.plate.projects:
-        #     label_y -= 40
-        #     c.setFillColor(proj.color)
-        #     c.rect(10, label_y, c.stringWidth(proj.name), 30, stroke=0, fill=1)
-        #     c.setFillColor('black')
-        #     c.drawString(10, label_y, proj.name)
         c.save()
 
         return
@@ -331,8 +317,6 @@ class Plate(OrderedDict):
 
         ratio = plate.columns / plate.rows
 
-        # if width > ratio * height:
-        #     width = math.floor(ratio * height)
         if height > (1/ratio) * width:
             height = math.floor((1/ratio) * width)
 

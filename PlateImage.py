@@ -130,26 +130,6 @@ class PlateWidget(tk.Frame):
             ypos = self.start_y + (pos.row * self.well_size)
             self.canvas.create_window(xpos, ypos, window=well, anchor=tk.NW)
 
-
-        ### For Vertical plates
-        # for j in range(self.plate.columns):
-        #     for i in range(self.plate.rows):
-        #         well = Well(self, self.plate, self.plate.position_from_rowcol(i, j), self.well_size, self.well_size, self.onWellPress, self.onWellRelease, self.onMove)
-        #         self.wells.append(well)
-        #         xpos = self.start_x + (j * self.well_size)
-        #         ypos = self.start_y + (i * self.well_size)
-        #         self.canvas.create_window(xpos, ypos, window=well)
-
-        ###  For Horizontal plates
-        # for j in range(8):
-        #     for i in range(12):
-        #         well = Well(self, Position.from_rowcol(j, i), self.well_size, self.well_size)
-        #         self.wells.append(well)
-        #         xpos = self.start_x + (i * self.well_size)
-        #         ypos = self.start_y + (j * self.well_size)
-        #         self.canvas.create_window(xpos, ypos, window=well)
-
-
         self.canvas.pack()
 
         return
@@ -182,69 +162,6 @@ class PlateWidget(tk.Frame):
 
     def onWellClick(self, well):
         self.onWellClickHandler(self.plate, well.position)
-    
 
 
-    # def clearSelection(self):
-    #     self.selection_start = None
-    #     self.selection_end = None
-    #     if self.onSelectionChange:
-    #         self.onSelectionChange([])
-    #     return
-    
-    # def onWellPress(self, position):
-
-    #     self.selecting = True
-    #     self.selection_start = self.wells[position.index]
-
-    #     return
-    
-    # def onWellRelease(self, position, event):
-
-    #     if self.selection_start is not None:
-    #         self.selecting = False
-    #         self.selection_end = self.getWellXY(event.x + (position.column * self.well_size) + self.start_x, event.y + (position.row * self.well_size) + self.start_y)        
-
-    #         start_index = self.wells.index(self.selection_start)
-    #         end_index = self.wells.index(self.selection_end)
-
-    #         if (self.selection_end is self.selection_start) and self.selection_start.selected:
-    #             self.selection_start.select(False)
-
-    #         else:
-    #             if end_index < start_index:
-    #                 temp = end_index
-    #                 end_index = start_index
-    #                 start_index = temp
-
-    #             for well in self.wells:
-    #                 if self.wells.index(well) in range(start_index, end_index + 1):
-    #                     well.select()
-    #                 else:
-    #                     well.select(False)
-            
-    #         if self.onSelectionChange:
-    #             self.onSelectionChange([well.position for well in self.wells if well.selected])
-
-    #     return
-
-    # def onMove(self, position, event):
-
-    #     if self.selection_start is not None and self.selecting:
-    #         self.selection_end = self.getWellXY(event.x + (position.column * self.well_size) + self.start_x, event.y + (position.row * self.well_size) + self.start_y)
-
-    #         start_index = self.wells.index(self.selection_start)
-    #         end_index = self.wells.index(self.selection_end)
-
-    #         if end_index < start_index:
-    #             temp = end_index
-    #             end_index = start_index
-    #             start_index = temp
-
-    #         for well in self.wells:
-    #             if self.wells.index(well) in range(start_index, end_index + 1):
-    #                 well.select()
-    #             else:
-    #                 well.select(False)
-
-
+        

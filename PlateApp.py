@@ -62,7 +62,7 @@ class PlateApp(tk.Frame):
 
         self.createMenu()
 
-
+        ### if initialized with file name, open that file
         if self._current_file is not None:
             self.loadFromFile(self._current_file)
 
@@ -120,7 +120,15 @@ class PlateApp(tk.Frame):
     
     def resetSelection(self):
         self.selected_position = (self.plates[0], None)
-        return
+        return    
+        
+    def createProjectLabel(self, parent, proj):
+        frame = tk.Frame(parent)
+        name = tk.Label(frame, text=proj.name, fg=proj.color, bg='white')
+        name.pack(side=tk.LEFT)
+        number = tk.Label(frame, text=proj.sample_count, bg='white')
+        number.pack(side=tk.LEFT)
+        return frame
 
     def createMenu(self):
 
@@ -227,20 +235,17 @@ class PlateApp(tk.Frame):
         return
     
     def removePlate(self, plate):
-        # self.plates.remove(plate)
         for i, p in enumerate(self.plates):
             if p is plate:
                 self.plates.pop(i)
         self.resetPlates()
         self.redrawList()
-        self.resetSelection()
 
     def removeSample(self, plate, position):
         if position:
             plate.removeSample(plate[position])
             self.resetPlates()
             self.redrawList()
-            self.resetSelection()
         return
     
     def removeProject(self, plate, position):
@@ -248,7 +253,6 @@ class PlateApp(tk.Frame):
             plate.removeProject(plate[position].project)
             self.resetPlates()
             self.redrawList()
-            self.resetSelection()
         return
 
     
@@ -257,6 +261,8 @@ class PlateApp(tk.Frame):
             Plate.saveToFile(filename, self.plates)
             self.current_file = filename
     
+
+    ###  TODO:  add / replace logic should move to caller this should return list of plates
     def loadFromFile(self, filename, add=False):
         if filename:
             try:
@@ -267,23 +273,13 @@ class PlateApp(tk.Frame):
                     self.plates = Plate.loadFromFile(filename)
                 self.redrawList()
                 self.resetPlates()
-                # self.current_file = filename
             except DuplicateEntryException:
                 messagebox.showerror("Error", "Plate file has duplicate entries")
             except MissingEntryException:
                 messagebox.showerror("Error", "Plate file has missing entries")
 
         return
-    
-    def createProjectLabel(self, parent, proj):
 
-        frame = tk.Frame(parent)
-        name = tk.Label(frame, text=proj.name, fg=proj.color, bg='white')
-        name.pack(side=tk.LEFT)
-        number = tk.Label(frame, text=proj.num, bg='white')
-        number.pack(side=tk.LEFT)
-
-        return frame
 
     def onWellClick(self, plate, position):
         well = self.getImage(plate).wells[position.index]
@@ -302,15 +298,7 @@ class PlateApp(tk.Frame):
 
 
         return
-    
-    # def onPlateSelectionChange(self, selected_positions):
 
-    #     self.selected_positions = selected_positions
-    #     if self.selectionChangeListeners:
-    #         for listener in self.selectionChangeListeners:
-    #             listener(self.selected_positions)
-
-    #     return
 
     def onAdd(self):
         try:
@@ -323,8 +311,6 @@ class PlateApp(tk.Frame):
             messagebox.showerror("Error", "Project will not fit!\n First occupied well - " + e.message)
         except NotEnoughWellsException as e:
             messagebox.showerror("Error", "Not Enough Wells\n" + e.message)
-        
-
         return
     
     def redrawList(self):
@@ -335,8 +321,7 @@ class PlateApp(tk.Frame):
             p_label.pack(side=tk.TOP)
             for proj in plate.projects:
                 label = self.createProjectLabel(self.proj_list_frame, proj)
-                label.pack(side=tk.TOP)
-        
+                label.pack(side=tk.TOP)        
         return
     
     def askNewProject(self):
