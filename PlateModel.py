@@ -211,11 +211,11 @@ class Plate(OrderedDict):
                     
         return plates
     
+    
 
     @classmethod
     def saveImage(cls, filename, plates):
         count = len(plates)
-        print (count)
         ### coords for image on PDF
         # image_height = (A4[0] - 30) / self.plate_image.canvas.winfo_width() * self.plate_image.canvas.winfo_height()
         total_width = A4[0] - 20
@@ -223,6 +223,7 @@ class Plate(OrderedDict):
 
         platew = total_width if count == 1 else total_width * 0.66 if count == 2 else (total_width / 2) - 20
         plateh = platew * 8/12
+        text_box_height = 60
 
         c = canvas.Canvas(filename, pagesize=A4)
         # image_bottom = A4[1] - image_height - 50
@@ -233,9 +234,10 @@ class Plate(OrderedDict):
                 bottomx = bottomx + platew + 10
             bottomy = A4[1] - 50 - plateh
             if i % 2:
-                bottomy = bottomy - plateh - 25
+                bottomy = bottomy - plateh - 25 - text_box_height
 
             Plate.drawPlate(c, plate, (bottomx, bottomy), plateh, platew)
+            Plate.labelPlate(c, plate, (bottomx, bottomy-text_box_height), text_box_height, platew)
         
 
 
@@ -252,6 +254,52 @@ class Plate(OrderedDict):
 
         return
     
+    @classmethod
+    def labelPlate(cls, canvas, plate, bottom_left, height, width):
+
+        label_depth = 3
+        text_size = height // label_depth
+        canvas.setFont("Helvetica", text_size)
+
+        label_x = bottom_left[0]
+        label_y = bottom_left[1] + height - (text_size/2)
+
+        count = len(plate.projects)
+        cols = (count // label_depth)
+        if (count % label_depth):
+            cols += 1
+        colw = width / cols
+
+        def getWidestName():
+            widest = 0
+            for proj in plate.projects:
+                length = canvas.stringWidth(proj.name) + 5
+                if length > widest:
+                    widest = length
+            return widest
+        
+        while getWidestName() > colw or height < text_size * (label_depth + 1):
+            text_size -= 1
+            while height >= text_size * (label_depth + 2):
+                label_depth += 1            
+                cols = (count // label_depth)
+                if (count % label_depth):
+                    cols += 1
+                colw = width / cols
+            canvas.setFont("Helvetica", text_size)
+
+        canvas.rect(bottom_left[0], bottom_left[1], width, height, fill=0)
+        for i, proj in enumerate(plate.projects):
+            if i % label_depth == 0:
+                label_x = bottom_left[0] + ((i//label_depth) * colw) + 5
+                label_y = bottom_left[1] + height - (text_size/2) 
+            label_y -= text_size * 1.1
+            canvas.setFillColor(proj.color)
+            canvas.rect(label_x, label_y, canvas.stringWidth(proj.name), text_size, stroke=0, fill=1)
+            canvas.setFillColor('black')
+            canvas.drawString(label_x, label_y + (text_size * 0.2), proj.name)
+            
+        return
 
     @classmethod
     def drawPlate(cls, canvas, plate, bottom_left, height, width):
@@ -295,7 +343,7 @@ class Plate(OrderedDict):
         txh = well_radius *1.3
         canvas.setFont("Helvetica", txh)
         for well in plate.positions:
-            label = plate[well.label].number if plate[well.label] is not None else ''
+            label = str(plate[well.label].number) if plate[well.label] is not None else ''
             x,y = getWellCenter(well)            
             canvas.setFillColor(plate[well.label].project.color if plate[well.label] else 'blue')
             canvas.circle(x, y, well_radius, stroke=1, fill=1)

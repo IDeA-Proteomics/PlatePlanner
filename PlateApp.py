@@ -16,7 +16,7 @@ color_list = ['red', 'orange', 'yellow', 'green', 'purple', 'cyan', 'magenta', '
 ###      fix color wheel issues
 ###      When adding projects, should see some sort of selection indication of wells used based on count - in Popups
 ###      Right Click Menu
-###      Track Currently open file
+###      Display file name on PDF
 ###      Add From Sample List
 
 
@@ -29,7 +29,7 @@ class PlateApp(tk.Frame):
 
         # self.root_window.report_callback_exception = self.exceptionHandler
 
-        self._current_file = None  ### abspath to currently open file
+        self._current_file = file  ### abspath to currently open file
         self.current_file_string = tk.StringVar(value="" if self._current_file == None else os.path.basename(self._current_file))
 
         self.plates = [Plate("Plate_1", rows=8, columns=12)]
@@ -62,6 +62,10 @@ class PlateApp(tk.Frame):
 
         self.createMenu()
 
+
+        if self._current_file is not None:
+            self.loadFromFile(self._current_file)
+
         return
     
     @property
@@ -69,8 +73,12 @@ class PlateApp(tk.Frame):
         return self._current_file
     @current_file.setter
     def current_file(self, file):
-        self._current_file = os.path.abspath(file)
-        self.current_file_string.set(os.path.basename(self._current_file))
+        if file is not None:
+            self._current_file = os.path.abspath(file)
+            self.current_file_string.set(os.path.basename(self._current_file))
+        else:
+            self._current_file = None
+            self.current_file_string.set("Unsaved")
         return
     
     def resetPlates(self):
@@ -92,6 +100,8 @@ class PlateApp(tk.Frame):
         for i in range(len(self.plate_images)):
             self.plate_images[i].pack(side=tk.TOP, anchor=tk.NW)
 
+        self.resetSelection()
+
         return
     
     @property
@@ -107,6 +117,10 @@ class PlateApp(tk.Frame):
             if p is plate:
                 return self.plate_images[i]
         return None
+    
+    def resetSelection(self):
+        self.selected_position = (self.plates[0], None)
+        return
 
     def createMenu(self):
 
@@ -144,12 +158,14 @@ class PlateApp(tk.Frame):
         self.plates = [Plate(name = name, rows=rows, columns=cols, vertical=vertical)]
         self.resetPlates()
         self.redrawList()
+        self.current_file = None
         return
 
     def filemenu_open(self):
         filename = filedialog.askopenfilename(parent=self.root_window, title="Open Plate File", filetypes=(("Plate File", "*.plate"),("All Files", "*.*")))
-        self.loadFromFile(filename)
-        self.current_file = filename
+        if filename:
+            self.loadFromFile(filename)
+            self.current_file = filename
         return
 
     def filemenu_save(self):
@@ -162,7 +178,8 @@ class PlateApp(tk.Frame):
     
     def filemenu_saveAs(self):
         filename = filedialog.asksaveasfilename(parent=self.root_window, title="Save Plate File", defaultextension='.plate', filetypes=(("Plate File", "*.plate"),("All Files", "*.*")))
-        self.onSave(filename)
+        if filename:
+            self.onSave(filename)
         return
 
     def filemenu_savepdf(self):
@@ -311,7 +328,7 @@ def main():
 
     root = tk.Tk()
 
-    app = PlateApp(root, '/home/david/IDeA_Scripts/TestData/test4.plate')
+    app = PlateApp(root, '/home/david/IDeA_Scripts/PlatePlanner/p1.plate')
     app.pack()
 
     root.mainloop()
