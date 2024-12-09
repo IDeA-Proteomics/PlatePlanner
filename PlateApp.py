@@ -1,5 +1,5 @@
 
-
+import os
 import PlateImage
 import Popups
 import tkinter as tk
@@ -12,22 +12,27 @@ color_list = ['red', 'orange', 'yellow', 'green', 'purple', 'cyan', 'magenta', '
 
 ####  TODO:
 ####     wrap long projects to second plate
-###      fix pdf output
-###      let Position have a reference ot Plate
+###      let Position have a reference to Plate
 ###      fix color wheel issues
 ###      When adding projects, should see some sort of selection indication of wells used based on count - in Popups
+###      Right Click Menu
+###      Track Currently open file
+###      Add From Sample List
 
 
 class PlateApp(tk.Frame):
 
-    def __init__(self, root):
+    def __init__(self, root, file=None):
 
         self.root_window = root
         tk.Frame.__init__(self, self.root_window)
 
         # self.root_window.report_callback_exception = self.exceptionHandler
 
-        self.plates = [Plate("OG Plate", rows=8, columns=12)]
+        self._current_file = None  ### abspath to currently open file
+        self.current_file_string = tk.StringVar(value="" if self._current_file == None else os.path.basename(self._current_file))
+
+        self.plates = [Plate("Plate_1", rows=8, columns=12)]
 
         self.selected_position = (self.plates[0], None)
         self.selectionChangeListeners = []
@@ -43,6 +48,9 @@ class PlateApp(tk.Frame):
 
         self.resetPlates()
 
+        self.file_label = tk.Label(self.proj_frame, textvariable=self.current_file_string)
+        self.file_label.pack(side=tk.TOP)
+
         self.add_button = tk.Button(self.proj_frame, text="Add", command=self.onAdd)
         self.add_button.pack(side=tk.TOP)
 
@@ -54,6 +62,15 @@ class PlateApp(tk.Frame):
 
         self.createMenu()
 
+        return
+    
+    @property
+    def current_file(self):
+        return self._current_file
+    @current_file.setter
+    def current_file(self, file):
+        self._current_file = os.path.abspath(file)
+        self.current_file_string.set(os.path.basename(self._current_file))
         return
     
     def resetPlates(self):
@@ -98,7 +115,8 @@ class PlateApp(tk.Frame):
         self.filemenu = Menu(self.menubar, tearoff=0)
         self.filemenu.add_command(label="New", command=self.filemenu_new)
         self.filemenu.add_command(label="Open", command=self.filemenu_open)
-        self.filemenu.add_command(label="Save", command=self.filemenu_save)       
+        self.filemenu.add_command(label="Save", command=self.filemenu_save) 
+        self.filemenu.add_command(label="Save As", command=self.filemenu_saveAs)      
 
         self.editmenu = Menu(self.menubar, tearoff=0)
         self.editmenu.add_command(label="Add Plate", command=self.editmenu_add_plate) 
@@ -129,11 +147,22 @@ class PlateApp(tk.Frame):
         return
 
     def filemenu_open(self):
-        self.loadFromFile()
+        filename = filedialog.askopenfilename(parent=self.root_window, title="Open Plate File", filetypes=(("Plate File", "*.plate"),("All Files", "*.*")))
+        self.loadFromFile(filename)
+        self.current_file = filename
         return
 
     def filemenu_save(self):
-        self.onSave()
+        filename = self.current_file
+        if filename:
+            self.onSave(filename)
+        else:
+            self.filemenu_saveAs()
+        return
+    
+    def filemenu_saveAs(self):
+        filename = filedialog.asksaveasfilename(parent=self.root_window, title="Save Plate File", defaultextension='.plate', filetypes=(("Plate File", "*.plate"),("All Files", "*.*")))
+        self.onSave(filename)
         return
 
     def filemenu_savepdf(self):
@@ -155,7 +184,8 @@ class PlateApp(tk.Frame):
         return
     
     def editmenu_add_from_file(self):
-        self.loadFromFile(True)
+        filename = filedialog.askopenfilename(parent=self.root_window, title="Open Plate File", filetypes=(("Plate File", "*.plate"),("All Files", "*.*")))
+        self.loadFromFile(filename, True)
         return
         
     
@@ -165,13 +195,12 @@ class PlateApp(tk.Frame):
         self.redrawList()
         return
     
-    def onSave(self):
-        filename = filedialog.asksaveasfilename(parent=self.root_window, title="Save Plate File", defaultextension='.plate', filetypes=(("Plate File", "*.plate"),("All Files", "*.*")))
+    def onSave(self, filename):
         if filename:
             Plate.saveToFile(filename, self.plates)
+            self.current_file = filename
     
-    def loadFromFile(self, add=False):
-        filename = filedialog.askopenfilename(parent=self.root_window, title="Open Plate File", filetypes=(("Plate File", "*.plate"),("All Files", "*.*")))
+    def loadFromFile(self, filename, add=False):
         if filename:
             try:
                 if add:
@@ -181,6 +210,7 @@ class PlateApp(tk.Frame):
                     self.plates = Plate.loadFromFile(filename)
                 self.redrawList()
                 self.resetPlates()
+                # self.current_file = filename
             except DuplicateEntryException:
                 messagebox.showerror("Error", "Plate file has duplicate entries")
             except MissingEntryException:
@@ -242,9 +272,12 @@ class PlateApp(tk.Frame):
     def redrawList(self):
         for widget in self.proj_list_frame.winfo_children():
             widget.destroy()
-        for proj in self.projects:
-            label = self.createProjectLabel(self.proj_list_frame, proj)
-            label.pack(side=tk.TOP)
+        for plate in self.plates:
+            p_label = tk.Label(self.proj_list_frame, text=plate.name)
+            p_label.pack(side=tk.TOP)
+            for proj in plate.projects:
+                label = self.createProjectLabel(self.proj_list_frame, proj)
+                label.pack(side=tk.TOP)
         
         return
     
@@ -278,7 +311,7 @@ def main():
 
     root = tk.Tk()
 
-    app = PlateApp(root)
+    app = PlateApp(root, '/home/david/IDeA_Scripts/TestData/test4.plate')
     app.pack()
 
     root.mainloop()
