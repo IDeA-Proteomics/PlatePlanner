@@ -354,7 +354,7 @@ def main():
 
     root = tk.Tk()
 
-    app = PlateApp(root, '/home/david/IDeA_Scripts/TestData/testPlate.plate')
+    app = PlateApp(root)
     app.pack()
 
     root.mainloop()

@@ -27,6 +27,8 @@ class LabeledEntry(tk.Frame):
 
 class AskNewPlate(tk.Toplevel):
 
+    askCount = 1
+
     def __init__(self, parent):
         self.parent = parent
         tk.Toplevel.__init__(self, self.parent)
@@ -34,7 +36,6 @@ class AskNewPlate(tk.Toplevel):
         self.cols = None
         self.rows = None
         self.vertical = True
-        self.count = 0
 
         values = ["8x12", "4x6"]
         orients = ["Vertical", "Horizontal"]
@@ -43,7 +44,7 @@ class AskNewPlate(tk.Toplevel):
         self.frame.pack()
 
 
-        self.name_entry = LabeledEntry(self.frame, text="Name", initial=f"Plate_{self.count+1}")
+        self.name_entry = LabeledEntry(self.frame, text="Name", initial=f"Plate_{AskNewPlate.askCount + 1}")
         self.name_entry.pack()
 
         self.rowVar = tk.IntVar(value=8)
@@ -65,10 +66,10 @@ class AskNewPlate(tk.Toplevel):
         return
 
     def onOK(self):
-        self.count += 1
+        AskNewPlate.askCount += 1
         self.name = self.name_entry.get()
         if self.name == "":
-            self.name = f"Plate_{self.count}"
+            self.name = f"Plate_{AskNewPlate.askCount}"
         result = self.sizeVar.get()
         self.rows = 4 if result == "4x6" else 8
         self.cols = 6 if result == "4x6" else 12
