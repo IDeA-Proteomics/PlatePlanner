@@ -6,6 +6,8 @@ from collections import OrderedDict
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 
+from idea_utils import SampleListReader
+
 ### Horizontal plates
 # position_string_list = [f'{c}{i+1}' for c in 'ABCDEFGH' for i in range(12)]
 
@@ -64,6 +66,16 @@ class Project(object):
             if s is sample:
                 self.samples.pop(i)
         return
+
+    @classmethod
+    def createFromSampleList(cls, filename, color):
+
+        reader = SampleListReader(filename)
+        proj = Project(reader.proj_name, color)
+        for i, s in enumerate(reader.sample_ids):
+            proj.addSample(Sample(proj, s, reader.sample_numbers[i]))
+
+        return proj
 
 color_list = ['red', 'orange', 'yellow', 'green', 'purple', 'cyan', 'magenta', 'brown']
 
