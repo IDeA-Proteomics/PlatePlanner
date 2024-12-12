@@ -18,6 +18,8 @@ color_list = ['red', 'orange', 'yellow', 'green', 'purple', 'cyan', 'magenta', '
 ###      Right Click Menu
 ###      Display file name on PDF
 ###      Add From Sample List
+###      When names don't fit, make just the one long one small instead of all of them
+###      Make just the name small, but fit the whole number ID since it really is what matters. 
 
 
 class PlateApp(tk.Frame):

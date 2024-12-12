@@ -133,9 +133,9 @@ class Plate(OrderedDict):
 
     def addProject(self, project, start_pos):
         start = start_pos.index
-        if not start + project.num <= self.number_of_wells:
-            raise NotEnoughWellsException(project.num, self.number_of_wells - start)
-        wells = self.position_string_list[start:start + project.num]
+        if not start + project.sample_count <= self.number_of_wells:
+            raise NotEnoughWellsException(project.sample_count, self.number_of_wells - start)
+        wells = self.position_string_list[start:start + project.sample_count]
         if all((self.data[well] == None for well in wells)):
             self.projects.append(project)
             for well, sample in list(zip(wells, project.samples)):
