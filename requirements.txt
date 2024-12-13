@@ -1,3 +1,12 @@
 chardet==5.2.0
+et_xmlfile==2.0.0
+idea_utils @ git+https://github.com/IDeA-Proteomics/IDeA_Utils.git@7b7faa023d6a2bf9fe072860610685ac3a198404
+numpy==2.2.0
+openpyxl==3.1.5
+pandas==2.2.3
 pillow==11.0.0
+python-dateutil==2.9.0.post0
+pytz==2024.2
 reportlab==4.2.5
+six==1.17.0
+tzdata==2024.2
