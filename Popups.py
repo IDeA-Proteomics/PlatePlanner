@@ -90,7 +90,7 @@ class AskNewProject(tk.Toplevel):
         return
 
 
-    def __init__(self, parent, selection, colors):
+    def __init__(self, parent, selection, colors, project=None):
         self.parent = parent
         tk.Toplevel.__init__(self, self.parent)
 
@@ -105,14 +105,14 @@ class AskNewProject(tk.Toplevel):
 
         self.frame = tk.Frame(self)
 
-        self.label = tk.Label(self.frame, text="Please Enter a Project Name")
+        self.label = tk.Label(self.frame, text="Please Enter a Project Name" if project is None else "Project Name")
         self.label.pack()
 
-        self.name_entry = LabeledEntry(self.frame, text="Name")
+        self.name_entry = LabeledEntry(self.frame, text="Name" if project is None else project.name, state='normal' if project is None else 'disabled')        
         self.name_entry.pack()
 
-        self.number_entry = LabeledEntry(self.frame, text="Number")
-        self.number_entry.set(str(len(selection)))
+        self.number_entry = LabeledEntry(self.frame, text="Number", state='normal' if project is None else 'disabled')
+        self.number_entry.set(0 if project is None else project.sample_count)
         self.number_entry.pack()
         
         

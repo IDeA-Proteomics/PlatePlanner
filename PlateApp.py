@@ -148,6 +148,7 @@ class PlateApp(tk.Frame):
         self.editmenu.add_command(label="Remove Plate", command=self.editmenu_remove_plate) 
         self.editmenu.add_command(label="Remove Project", command=self.editmenu_remove_project) 
         self.editmenu.add_command(label="Remove Sample", command=self.editmenu_remove_sample) 
+        self.editmenu.add_command(label="Add Project", command=self.editmenu_add_project_from_file) 
 
 
         self.menubar.add_cascade(label="File", menu=self.filemenu)
@@ -228,7 +229,12 @@ class PlateApp(tk.Frame):
     
     def editmenu_remove_project(self):
         self.removeProject(self.selected_position[0], self.selected_position[1])
-        return        
+        return    
+
+    def editmenu_add_project_from_file(self):
+        filename = filedialog.askopenfilename(parent=self.root_window, title="Open Project File", filetypes=(("xlsx", "*.xlsx"),("All Files", "*.*")))
+        self.addProjectFromFile(filename)
+        return
     
     def addPlate(self, plate):
         self.plates.append(plate)
@@ -301,6 +307,17 @@ class PlateApp(tk.Frame):
 
         return
 
+    def addProjectFromFile(self, filename):
+
+        project = Project.createFromSampleList(filename)
+        if project:
+            _, plate, pos = self.askNewProject(project)
+            plate.addProject(project, pos)
+            self.redrawList()
+            self.getImage(plate).redrawSamples()
+
+        return
+
 
     def onAdd(self):
         try:
@@ -326,7 +343,7 @@ class PlateApp(tk.Frame):
                 label.pack(side=tk.TOP)        
         return
     
-    def askNewProject(self):
+    def askNewProject(self, project=None):
         colors = [color for color in color_list if color not in [proj.color for proj in self.projects]]
         if len(colors) == 0:
             colors = color_list
@@ -335,10 +352,14 @@ class PlateApp(tk.Frame):
         self.selectionChangeListeners.append(asker.onSelectionChange)
         self.wait_window(asker)
         self.selectionChangeListeners.remove(asker.onSelectionChange)
-        if asker.name and asker.number:
-            rv = (Project(name=asker.name, num_samples=asker.number, color=asker.color), asker.plate, asker.position)
+        if project is None:
+            if asker.name and asker.number:
+                rv = (Project(name=asker.name, num_samples=asker.number, color=asker.color), asker.plate, asker.position)
+            else:
+                rv = (None, None, None)
         else:
-            rv = (None, None, None)
+            project.color = asker.color
+            rv = (project, asker.plate, asker.position)
 
         return rv
     
