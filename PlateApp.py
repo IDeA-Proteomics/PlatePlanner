@@ -347,7 +347,7 @@ class PlateApp(tk.Frame):
         colors = [color for color in color_list if color not in [proj.color for proj in self.projects]]
         if len(colors) == 0:
             colors = color_list
-        asker = Popups.AskNewProject(self.root_window, self.selected_position, colors)
+        asker = Popups.AskNewProject(self.root_window, self.selected_position, colors, project)
         # self.plate_image.clearSelection()
         self.selectionChangeListeners.append(asker.onSelectionChange)
         self.wait_window(asker)

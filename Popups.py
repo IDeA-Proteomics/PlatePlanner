@@ -4,7 +4,7 @@ from PlateModel import Position
 
 class LabeledEntry(tk.Frame):
 
-    def __init__(self, parent, text, initial = None):
+    def __init__(self, parent, text, initial = None, state = 'normal'):
         self.parent = parent
         tk.Frame.__init__(self, self.parent)
         self.text = text
@@ -13,7 +13,7 @@ class LabeledEntry(tk.Frame):
         self.label.pack(side=tk.LEFT, anchor=tk.E)
 
         self.entry_text = tk.StringVar(value = "" if initial is None else initial)
-        self.entry = tk.Entry(self, width=25, textvariable=self.entry_text)
+        self.entry = tk.Entry(self, width=25, textvariable=self.entry_text, state=state)
         self.entry.pack(side=tk.LEFT, anchor=tk.W)
 
         return
@@ -108,7 +108,8 @@ class AskNewProject(tk.Toplevel):
         self.label = tk.Label(self.frame, text="Please Enter a Project Name" if project is None else "Project Name")
         self.label.pack()
 
-        self.name_entry = LabeledEntry(self.frame, text="Name" if project is None else project.name, state='normal' if project is None else 'disabled')        
+        self.name_entry = LabeledEntry(self.frame, text="Name", state='normal' if project is None else 'disabled')  
+        self.name_entry.set("" if project is None else project.name)      
         self.name_entry.pack()
 
         self.number_entry = LabeledEntry(self.frame, text="Number", state='normal' if project is None else 'disabled')

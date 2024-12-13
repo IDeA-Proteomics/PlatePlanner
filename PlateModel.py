@@ -70,8 +70,8 @@ class Project(object):
     @classmethod
     def createFromSampleList(cls, filename, color=None):
 
-        reader = SampleListReader(filename)
-        proj = Project(reader.proj_name, color)
+        reader = SampleListReader.SampleListReader(filename)
+        proj = Project(reader.project_name, color)
         for i, s in enumerate(reader.sample_ids):
             proj.addSample(Sample(proj, s, reader.sample_numbers[i]))
 
