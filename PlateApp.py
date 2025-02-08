@@ -8,12 +8,11 @@ from PlateModel import Sample, Project, Plate
 from PlateExceptions import *
 
 
-color_list = ['red', 'orange', 'yellow', 'green', 'purple', 'cyan', 'magenta', 'brown']
+color_list = ['red', 'green', 'orange', 'purple', 'yellow', 'blue', 'magenta', 'brown', 'cyan']
 
 ####  TODO:
 ####     wrap long projects to second plate
 ###      let Position have a reference to Plate
-###      fix color wheel issues
 ###      When adding projects, should see some sort of selection indication of wells used based on count - in Popups
 ###      Right Click Menu
 ###      Display file name on PDF

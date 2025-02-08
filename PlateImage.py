@@ -32,7 +32,7 @@ class Well(tk.Canvas):
     
     def _draw(self):
         self.config(bg='magenta' if self.selected else 'white')
-        fill = 'blue' if self.plate[self.position] is None else self.plate[self.position].project.color
+        fill = 'white' if self.plate[self.position] is None else self.plate[self.position].project.color
 
         self.well = self.create_oval(self.w/2 - self.radius, self.h/2 - self.radius, self.w/2 + self.radius, self.h/2 + self.radius, fill=fill)
         t = self.plate[self.position].number if self.plate[self.position] is not None else ""
