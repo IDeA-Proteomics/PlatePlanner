@@ -218,7 +218,8 @@ class PlateApp(tk.Frame):
         return
     
     def editmenu_remove_plate(self):
-        self.removePlate(self.selected_position[0])
+        if len(self.plates) > 1:
+            self.removePlate(self.selected_position[0])
         return
     
     def editmenu_remove_sample(self):

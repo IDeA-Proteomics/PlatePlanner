@@ -140,7 +140,8 @@ class Plate(OrderedDict):
     
     ### Only removes from plate, not from the project
     def removeSample(self, sample):
-        self[sample.position] = None
+        if self[sample.position] is sample:
+            self[sample.position] = None
         return
 
     def addProject(self, project, start_pos):
