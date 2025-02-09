@@ -224,8 +224,13 @@ class PlateApp(tk.Frame):
         return
     
     def editmenu_remove_plate(self):
-        if len(self.plates) > 1:
-            self.removePlate(self.selected_position[0])
+        if len(self.plates)>1:
+            if self.selected_position[1] is None:
+                messagebox.showinfo("Info", "Please Select a Well First")        
+            else:
+                self.removePlate(self.selected_position[0])
+        else:
+            messagebox.showinfo("Info", "Can't remove last plate")
         return
     
     def editmenu_remove_sample(self):
