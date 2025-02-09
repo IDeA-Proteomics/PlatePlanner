@@ -11,12 +11,9 @@ from PlateExceptions import *
 color_list = ['red', 'green', 'orange', 'purple', 'yellow', 'blue', 'magenta', 'brown', 'cyan']
 
 ####  TODO:
-####     wrap long projects to second plate
 ###      let Position have a reference to Plate
 ###      When adding projects, should see some sort of selection indication of wells used based on count - in Popups
 ###      Right Click Menu
-###      Display file name on PDF
-###      Add From Sample List
 ###      When names don't fit, make just the one long one small instead of all of them
 ###      Make just the name small, but fit the whole number ID since it really is what matters. 
 

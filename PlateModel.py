@@ -271,11 +271,14 @@ class Plate(OrderedDict):
         total_width = A4[0] - 20
         total_height = A4[1] - 200
 
+
         platew = total_width if count == 1 else total_width * 0.66 if count == 2 else (total_width / 2) - 20
         plateh = platew * 8/12
         text_box_height = 60
 
         c = canvas.Canvas(filename, pagesize=A4)
+        c.setFillColor('black')
+        c.drawString(20, A4[1]-20, filename)
         for i, plate in enumerate(plates):
             bottomx = 15
             if i > 1:
