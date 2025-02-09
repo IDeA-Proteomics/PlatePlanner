@@ -156,7 +156,7 @@ class Plate(OrderedDict):
         wells = self.position_string_list[start:start + count]
         if all((self.data[well] == None for well in wells)):
             self.projects.append(project)
-            for well, sample in list(zip(wells, project.samples)):
+            for well, sample in list(zip(wells, project.samples[first_sample:last_sample+1])):
                 self[well] = sample
             ### sort projects in the order they appear on plate
             self.projects.sort(key=lambda pr: pr.samples[0].position.index)
@@ -224,7 +224,8 @@ class Plate(OrderedDict):
                 c = int(line[6])
                 v = False if line[7] == 'False' else True
                 return (n, r, c, v)
-
+            
+            all_projects = []
             n, r, c, v = getNRCV(readList[0])
             newPlate = Plate(n, r, c, v)
 
@@ -242,7 +243,14 @@ class Plate(OrderedDict):
                 sample_number = int(line[4]) if len(line) > 4 and line[4] != '-' else None
                 if sample_name != 'EMPTY' and proj_name != 'EMPTY':
                     if proj_name not in [p.name for p in newPlate.projects]:
-                        newPlate.projects.append(Project(proj_name, color_list[pcount%len(color_list)]))
+                        proj = None
+                        for p in all_projects:
+                            if p.name == proj_name:
+                                proj = p
+                        if proj is None:
+                            proj = Project(proj_name, color_list[pcount%len(color_list)])
+                            all_projects.append(proj)
+                        newPlate.projects.append(proj)
                         pcount += 1
                     for p in newPlate.projects:
                         if p.name == proj_name:

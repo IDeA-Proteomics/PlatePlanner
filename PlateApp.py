@@ -117,6 +117,13 @@ class PlateApp(tk.Frame):
         for i, p in enumerate(self.plates):
             if p is plate:
                 return self.plate_images[i]
+        return 
+    
+    def getNextPlate(self, plate):
+        for i, p in enumerate(self.plates):
+            if p is plate:
+                if len(self.plates) > i+1:
+                    return self.plates[i+1]
         return None
     
     def resetSelection(self):
@@ -270,7 +277,6 @@ class PlateApp(tk.Frame):
             self.current_file = filename
     
 
-    ###  TODO:  add / replace logic should move to caller this should return list of plates
     def loadFromFile(self, filename, add=False):
         if filename:
             try:
@@ -312,24 +318,35 @@ class PlateApp(tk.Frame):
         project = Project.createFromSampleList(filename)
         if project:
             _, plate, pos = self.askNewProject(project)
-            plate.addProject(project, pos)
+            try:
+                plate.addProject(project, pos)
+            except WellNotFreeException as e:
+                messagebox.showerror("Error", "Project will not fit!\n First occupied well - " + e.message)
+            except NotEnoughWellsException as e:
+                messagebox.showerror("Error", "Not Enough Wells\n" + e.message)
             self.redrawList()
-            self.getImage(plate).redrawSamples()
+            self.resetPlates()
 
         return
 
 
     def onAdd(self):
-        try:
-            proj, plate, pos = self.askNewProject()
-            if proj:
+        proj, plate, pos = self.askNewProject()
+        if proj:
+            try:
                 plate.addProject(proj, pos)
-                self.redrawList()
-                self.getImage(plate).redrawSamples()
-        except WellNotFreeException as e:
-            messagebox.showerror("Error", "Project will not fit!\n First occupied well - " + e.message)
-        except NotEnoughWellsException as e:
-            messagebox.showerror("Error", "Not Enough Wells\n" + e.message)
+            except WellNotFreeException as e:
+                messagebox.showerror("Error", "Project will not fit!\n First occupied well - " + e.message)
+            except NotEnoughWellsException as e:
+                next_plate = self.getNextPlate(plate)
+                if next_plate is not None:
+                    plate.addProject(proj, pos, first_sample=0, last_sample=e.avalable - 1)
+                    next_plate.addProject(proj, next_plate.getFreeWells()[0], first_sample=e.avalable)
+                else:
+                    messagebox.showerror("Error", "Not Enough Wells\n" + e.message)
+            self.redrawList()
+            self.resetPlates()
+        
         return
     
     def redrawList(self):

@@ -146,7 +146,8 @@ class AskNewProject(tk.Toplevel):
     def onOk(self):
         self.name = self.name_entry.get()
         num = self.number_entry.get()
-        self.number = int(num) if num.isnumeric() and int(num) < self.plate.number_of_wells else 0
+        self.number = int(num) if num.isnumeric() else 0
+        #and int(num) < self.plate.number_of_wells else 0
         self.position = self.plate.position_from_string(self.start_position_var.get())
         self.color = self.color_var.get()
         self.destroy()
