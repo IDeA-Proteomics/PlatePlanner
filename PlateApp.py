@@ -85,15 +85,15 @@ class PlateApp(tk.Frame):
         self.plate_frames = []
         self.plate_images = []
 
-        self.plate_frames = [tk.Frame(self.plate_outer_frame) for _ in range(2 if self.plate_count > 2 else 1)]
+        self.plate_frames = [tk.Frame(self.plate_outer_frame) for _ in range(2 if self.plate_count > 1 else 1)]
         for f in self.plate_frames:
-            f.pack(side=tk.LEFT)
+            f.pack(side=tk.LEFT, expand=True, fill=tk.Y)
 
         for i in range(min(4, self.plate_count)):
             platex = 10
             platey = 10
             platew = 900 if self.plate_count == 1 else 600 if self.plate_count < 3 else 450
-            platef = 0 if i<2 else 1
+            platef = 0 if i<1 else i%2
             self.plate_images.append(PlateImage.PlateWidget(self.plate_frames[platef], plate=self.plates[i], platex=platex, platey=platey, platew=platew, onWellClickHandler=self.onWellClick, onWellRightClickHandler=self.onWellRightClick))
         for i in range(len(self.plate_images)):
             self.plate_images[i].pack(side=tk.TOP, anchor=tk.NW)
