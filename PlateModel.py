@@ -41,7 +41,7 @@ class Sample(object):
 
 class Project(object):
 
-    def __init__(self, name, color, num_samples = 0):
+    def __init__(self, name, color = None, num_samples = 0):
 
         self.name = name
         self.color = color
@@ -68,10 +68,10 @@ class Project(object):
         return
 
     @classmethod
-    def createFromSampleList(cls, filename, color):
+    def createFromSampleList(cls, filename, color=None):
 
-        reader = SampleListReader(filename)
-        proj = Project(reader.proj_name, color)
+        reader = SampleListReader.SampleListReader(filename)
+        proj = Project(reader.project_name, color)
         for i, s in enumerate(reader.sample_ids):
             proj.addSample(Sample(proj, s, reader.sample_numbers[i]))
 
