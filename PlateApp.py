@@ -265,8 +265,11 @@ class PlateApp(tk.Frame):
         return
     
     def removeProject(self, plate, position):
-        if position:        
-            plate.removeProject(plate[position].project)
+        if position:
+            proj = plate[position].project
+            if proj is not None:
+                for p in self.plates:
+                    p.removeProject(proj)
             self.resetPlates()
             self.redrawList()
         return
