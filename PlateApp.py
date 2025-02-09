@@ -317,21 +317,12 @@ class PlateApp(tk.Frame):
 
         project = Project.createFromSampleList(filename)
         if project:
-            _, plate, pos = self.askNewProject(project)
-            try:
-                plate.addProject(project, pos)
-            except WellNotFreeException as e:
-                messagebox.showerror("Error", "Project will not fit!\n First occupied well - " + e.message)
-            except NotEnoughWellsException as e:
-                messagebox.showerror("Error", "Not Enough Wells\n" + e.message)
-            self.redrawList()
-            self.resetPlates()
-
+            self.onAdd(project)
         return
 
 
-    def onAdd(self):
-        proj, plate, pos = self.askNewProject()
+    def onAdd(self, project = None):
+        proj, plate, pos = self.askNewProject(project)
         if proj:
             try:
                 plate.addProject(proj, pos)
