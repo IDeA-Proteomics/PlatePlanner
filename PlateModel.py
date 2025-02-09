@@ -1,6 +1,7 @@
 
 import csv
 import math
+import os
 from PlateExceptions import *
 from collections import OrderedDict
 from reportlab.pdfgen import canvas
@@ -278,7 +279,7 @@ class Plate(OrderedDict):
 
         c = canvas.Canvas(filename, pagesize=A4)
         c.setFillColor('black')
-        c.drawString(20, A4[1]-20, filename)
+        c.drawString(20, A4[1]-20, os.path.basename(filename))
         for i, plate in enumerate(plates):
             bottomx = 15
             if i > 1:
