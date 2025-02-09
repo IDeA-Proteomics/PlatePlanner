@@ -364,6 +364,13 @@ class PlateApp(tk.Frame):
         colors = [color for color in color_list if color not in [proj.color for proj in self.projects]]
         if len(colors) == 0:
             colors = color_list
+        if len(self.selected_position[0].getFreeWells()) < 1:
+            p = self.getNextPlate(self.selected_position[0])
+            if p is not None:
+                self.selected_position = (p, None)
+            else:
+                messagebox.showerror("Error", "There is no free space in the plate")
+                return (None, None, None)
         asker = Popups.AskNewProject(self.root_window, self.selected_position, colors, project)
         # self.plate_image.clearSelection()
         self.selectionChangeListeners.append(asker.onSelectionChange)
