@@ -130,11 +130,12 @@ class PlateApp(tk.Frame):
         self.selected_position = (self.plates[0], None)
         return    
         
-    def createProjectLabel(self, parent, proj):
+    def createProjectLabel(self, parent, plate, proj):
         frame = tk.Frame(parent)
         name = tk.Label(frame, text=proj.name, fg=proj.color, bg='white')
         name.pack(side=tk.LEFT)
-        number = tk.Label(frame, text=proj.sample_count, bg='white')
+        in_plate = [s for s in proj.samples if s in plate.getSamples()]
+        number = tk.Label(frame, text="{} - {}".format(in_plate[0].number, in_plate[-1].number), bg='white')
         number.pack(side=tk.LEFT)
         return frame
 
@@ -347,7 +348,7 @@ class PlateApp(tk.Frame):
             p_label = tk.Label(self.proj_list_frame, text=plate.name)
             p_label.pack(side=tk.TOP)
             for proj in plate.projects:
-                label = self.createProjectLabel(self.proj_list_frame, proj)
+                label = self.createProjectLabel(self.proj_list_frame, plate, proj)
                 label.pack(side=tk.TOP)        
         return
     
