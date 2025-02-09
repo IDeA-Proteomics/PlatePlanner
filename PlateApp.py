@@ -94,7 +94,7 @@ class PlateApp(tk.Frame):
             platey = 10
             platew = 900 if self.plate_count == 1 else 600 if self.plate_count < 3 else 450
             platef = 0 if i<2 else 1
-            self.plate_images.append(PlateImage.PlateWidget(self.plate_frames[platef], plate=self.plates[i], platex=platex, platey=platey, platew=platew, onWellClickHandler=self.onWellClick))
+            self.plate_images.append(PlateImage.PlateWidget(self.plate_frames[platef], plate=self.plates[i], platex=platex, platey=platey, platew=platew, onWellClickHandler=self.onWellClick, onWellRightClickHandler=self.onWellRightClick))
         for i in range(len(self.plate_images)):
             self.plate_images[i].pack(side=tk.TOP, anchor=tk.NW)
 
@@ -159,10 +159,15 @@ class PlateApp(tk.Frame):
         self.menubar.add_cascade(label="Edit", menu=self.editmenu)
         self.menubar.add_command(label="To PDF", command=self.filemenu_savepdf)
 
+        self.plate_context_menu = Menu(self.root_window, tearoff=0)
+        self.plate_context_menu.add_command(label="Add Project", command=self.editmenu_add_project_from_file) 
+        self.plate_context_menu.add_command(label="Remove Project", command=self.editmenu_remove_project) 
+        self.plate_context_menu.add_command(label="Remove Sample", command=self.editmenu_remove_sample) 
+
         self.root_window.config(menu=self.menubar)
 
         return
-    
+
     def filemenu_new(self):
         asker = Popups.AskNewPlate(self.root_window)
         self.wait_window(asker)
@@ -220,7 +225,8 @@ class PlateApp(tk.Frame):
     
     def editmenu_add_from_file(self):
         filename = filedialog.askopenfilename(parent=self.root_window, title="Open Plate File", filetypes=(("Plate File", "*.plate"),("All Files", "*.*")))
-        self.loadFromFile(filename, True)
+        if filename is not None:
+            self.loadFromFile(filename, True)
         return
     
     def editmenu_remove_plate(self):
@@ -243,7 +249,10 @@ class PlateApp(tk.Frame):
 
     def editmenu_add_project_from_file(self):
         filename = filedialog.askopenfilename(parent=self.root_window, title="Open Project File", filetypes=(("xlsx", "*.xlsx"),("All Files", "*.*")))
-        self.addProjectFromFile(filename)
+        if filename:
+            self.addProjectFromFile(filename)
+        else:
+            self.onAdd()
         return
     
     def addPlate(self, plate):
@@ -260,14 +269,14 @@ class PlateApp(tk.Frame):
         self.redrawList()
 
     def removeSample(self, plate, position):
-        if position:
+        if position and plate[position] is not None:
             plate.removeSample(plate[position])
             self.resetPlates()
             self.redrawList()
         return
     
     def removeProject(self, plate, position):
-        if position:
+        if position and plate[position] is not None:
             proj = plate[position].project
             if proj is not None:
                 for p in self.plates:
@@ -315,8 +324,11 @@ class PlateApp(tk.Frame):
         if self.selectionChangeListeners:
             for listener in self.selectionChangeListeners:
                 listener(self.selected_position)
-
-
+        return
+    
+    def onWellRightClick(self, plate, position, event):
+        self.selected_position = (plate, position)
+        self.plate_context_menu.post(event.x_root, event.y_root)
         return
 
     def addProjectFromFile(self, filename):

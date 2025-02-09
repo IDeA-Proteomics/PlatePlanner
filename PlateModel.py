@@ -69,7 +69,7 @@ class Project(object):
 
     @classmethod
     def createFromSampleList(cls, filename, color=None):
-
+        proj = None
         reader = SampleListReader.SampleListReader(filename)
         proj = Project(reader.project_name, color)
         for i, s in enumerate(reader.sample_ids):
@@ -140,7 +140,7 @@ class Plate(OrderedDict):
     
     ### Only removes from plate, not from the project
     def removeSample(self, sample):
-        if self[sample.position] is sample:
+        if sample is not None and self[sample.position] is sample:
             self[sample.position] = None
         return
 

@@ -8,7 +8,7 @@ from PlateModel import Sample, Project, Position  ###, position_string_list
 ###
 ###
 class Well(tk.Canvas):
-    def __init__(self, parent, plate, position, w, h, onClickHandler):
+    def __init__(self, parent, plate, position, w, h, onClickHandler, onRightClickHandler):
         self.parent = parent
         tk.Canvas.__init__(self, self.parent, width=w, height=h, bg='white')
 
@@ -20,10 +20,12 @@ class Well(tk.Canvas):
         self.radius = math.floor(min(self.h, self.w) * 0.45)
         self.selected = False
         self.onClickHandler = onClickHandler
+        self.onRightClickHandler = onRightClickHandler
 
         self._draw()
         
         self.bind('<Button-1>', self.onClick)
+        self.bind('<Button-3>', self.onRightClick)
         # self.bind('<ButtonPress-1>', self.onPress)
         # self.bind('<ButtonRelease-1>', self.onRelease)
         # self.bind('<B1-Motion>', self.onMove)
@@ -46,6 +48,9 @@ class Well(tk.Canvas):
     
     def onClick(self, event):
         self.onClickHandler(self)
+
+    def onRightClick(self, event):
+        self.onRightClickHandler(self, event)
     
     # def onPress(self, event):
     #     self.onPressHandler(self.position)
@@ -64,13 +69,14 @@ class Well(tk.Canvas):
 
 class PlateWidget(tk.Frame):
 
-    def __init__(self, parent, plate, platex, platey, platew, onWellClickHandler = None):
+    def __init__(self, parent, plate, platex, platey, platew, onWellClickHandler = None, onWellRightClickHandler = None):
 
         self.parent = parent
         tk.Frame.__init__(self, self.parent)
 
         self.plate = plate
         self.onWellClickHandler = onWellClickHandler
+        self.onWellRightClickHandler = onWellRightClickHandler
 
         self.x = platex
         self.y = platey
@@ -124,7 +130,7 @@ class PlateWidget(tk.Frame):
 
 
         for pos in self.plate.positions:
-            well = Well(self, self.plate, pos, self.well_size, self.well_size, self.onWellClick)
+            well = Well(self, self.plate, pos, self.well_size, self.well_size, self.onWellClick, self.onWellRightClick)
             self.wells.append(well)
             xpos = self.start_x + (pos.column * self.well_size)
             ypos = self.start_y + (pos.row * self.well_size)
@@ -163,5 +169,7 @@ class PlateWidget(tk.Frame):
     def onWellClick(self, well):
         self.onWellClickHandler(self.plate, well.position)
 
+    def onWellRightClick(self, well, event):
+        self.onWellRightClickHandler(self.plate, well.position, event)
 
         
