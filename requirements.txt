@@ -1,6 +1,6 @@
 chardet==5.2.0
 et_xmlfile==2.0.0
-idea_utils @ git+https://github.com/IDeA-Proteomics/IDeA_Utils.git@7b7faa023d6a2bf9fe072860610685ac3a198404
+idea_utils @ git+https://github.com/IDeA-Proteomics/IDeA_Utils.git@961e8881326bf5fa6c821f79c54074060211ed07
 numpy==2.2.0
 openpyxl==3.1.5
 pandas==2.2.3

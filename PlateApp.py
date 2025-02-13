@@ -4,8 +4,8 @@ import PlateImage
 import Popups
 import tkinter as tk
 from tkinter import messagebox, filedialog, Menu
-from PlateModel import Sample, Project, Plate
-from PlateExceptions import *
+from idea_utils.PlateExceptions import *
+from idea_utils.PlateModel import Sample, Project, Plate
 
 
 color_list = ['red', 'green', 'orange', 'purple', 'yellow', 'blue', 'magenta', 'brown', 'cyan']

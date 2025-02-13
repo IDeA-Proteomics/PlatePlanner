@@ -1,6 +1,6 @@
 import tkinter as tk
 import math
-from PlateModel import Sample, Project, Position  ###, position_string_list
+from idea_utils.PlateModel import Sample, Project, Position  ###, position_string_list
 
 
 ###

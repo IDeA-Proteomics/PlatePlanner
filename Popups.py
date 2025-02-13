@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from PlateModel import Position
+from idea_utils.PlateModel import Position
 
 class LabeledEntry(tk.Frame):
 
