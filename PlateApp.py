@@ -124,7 +124,10 @@ class PlateApp(tk.Frame):
         return None
     
     def resetSelection(self):
-        self.selected_position = (self.plates[0], None)
+        if len(self.plates) > 0:
+            self.selected_position = (self.plates[0], None)
+        else:
+            self.selected_position = (None, None)
         return    
         
     def createProjectLabel(self, parent, plate, proj):
@@ -154,9 +157,13 @@ class PlateApp(tk.Frame):
         self.editmenu.add_command(label="Remove Sample", command=self.editmenu_remove_sample) 
         self.editmenu.add_command(label="Add Project", command=self.editmenu_add_project_from_file) 
 
+        self.setupmenu = Menu(self.menubar, tearoff=0)
+        self.setupmenu.add_command(label="Create BCA Plates", command=self.setupmenu_create_bca_plates)
+
 
         self.menubar.add_cascade(label="File", menu=self.filemenu)
         self.menubar.add_cascade(label="Edit", menu=self.editmenu)
+        self.menubar.add_cascade(label="Setup", menu=self.setupmenu)
         self.menubar.add_command(label="To PDF", command=self.filemenu_savepdf)
 
         self.plate_context_menu = Menu(self.root_window, tearoff=0)
@@ -254,6 +261,11 @@ class PlateApp(tk.Frame):
         else:
             self.onAdd()
         return
+
+    def setupmenu_create_bca_plates(self):
+        self.createBcaPlates()
+        return
+
     
     def addPlate(self, plate):
         self.plates.append(plate)
@@ -284,6 +296,18 @@ class PlateApp(tk.Frame):
             self.resetPlates()
             self.redrawList()
         return
+
+    def createBcaPlates(self):
+        for plate in self.plates:
+            self.removePlate(plate)
+        
+        for i in range(3):
+            self.addPlate(Plate(name=f"Samples{i+1}", rows=4, columns=6, vertical=True))
+        self.resetPlates()
+        self.redrawList()
+
+        return
+
 
     
     def onSave(self, filename):
@@ -354,8 +378,7 @@ class PlateApp(tk.Frame):
                 else:
                     messagebox.showerror("Error", "Not Enough Wells\n" + e.message)
             self.redrawList()
-            self.resetPlates()
-        
+            self.resetPlates()        
         return
     
     def redrawList(self):
