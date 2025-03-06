@@ -366,17 +366,44 @@ class PlateApp(tk.Frame):
     def onAdd(self, project = None):
         proj, plate, pos = self.askNewProject(project)
         if proj:
-            try:
-                plate.addProject(proj, pos)
-            except WellNotFreeException as e:
-                messagebox.showerror("Error", "Project will not fit!\n First occupied well - " + e.message)
-            except NotEnoughWellsException as e:
-                next_plate = self.getNextPlate(plate)
-                if next_plate is not None:
-                    plate.addProject(proj, pos, first_sample=0, last_sample=e.avalable - 1)
-                    next_plate.addProject(proj, next_plate.getFreeWells()[0], first_sample=e.avalable)
-                else:
-                    messagebox.showerror("Error", "Not Enough Wells\n" + e.message)
+            finished = False
+            first = 0
+            while not finished:
+                try:
+                    plate.addProject(proj, pos, first_sample=first)
+                    finished = True
+                except WellNotFreeException as e:
+                    messagebox.showerror("Error", "Project will not fit!\n First occupied well - " + e.message)
+                except NotEnoughWellsException as e:
+                    ###  Add what you can to this plate
+                    plate.addProject(proj, pos, first_sample=first, last_sample=first + e.avalable - 1)
+                    # self.redrawList()
+                    # self.resetPlates()
+                    first = first + e.avalable
+                    ###  Pick a new plate or cancel
+                    asker = Popups.AskPosition(self.root_window, self.selected_position)
+                    self.selectionChangeListeners.append(asker.onSelectionChange)
+                    self.wait_window(asker)
+                    self.selectionChangeListeners.remove(asker.onSelectionChange)
+                    
+                    if asker.position is not None:
+
+                    
+                    ###  set plate to new plate and run while loop again (set pos to first free well?)
+                        plate = asker.plate
+                        pos = asker.position
+                    
+                    else:  ### User chose Cancel instead of new position
+                        finished = True
+
+
+                    ###  OLD CODE BELOW
+                    # next_plate = self.getNextPlate(plate)
+                    # if next_plate is not None:
+                    #     plate.addProject(proj, pos, first_sample=0, last_sample=e.avalable - 1)
+                    #     next_plate.addProject(proj, next_plate.getFreeWells()[0], first_sample=e.avalable)
+                    # else:
+                    #     messagebox.showerror("Error", "Not Enough Wells\n" + e.message)
             self.redrawList()
             self.resetPlates()        
         return

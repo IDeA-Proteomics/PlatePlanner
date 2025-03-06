@@ -153,6 +153,70 @@ class AskNewProject(tk.Toplevel):
         self.destroy()
 
 
+
+class AskPosition(tk.Toplevel):
+
+    def setup(self, selection):
+        self.plate = selection[0]        
+        self.plate_name_var.set(self.plate.name)
+        self.position_list = [pos.label for pos in self.plate.getFreeWells()]
+        self.selection_pos = selection[1] if selection[1] is not None and selection[1].label in self.position_list else None
+        self.start_selection = self.position_list[0] if self.selection_pos is None else self.selection_pos.label
+        self.start_position_var.set(self.start_selection)
+
+        return
+
+    def __init__(self, parent, selection):
+        self.parent = parent
+        tk.Toplevel.__init__(self, self.parent)
+
+        self.start_position_var = tk.StringVar(value = "")
+        self.plate_name_var = tk.StringVar(value="")
+        self.setup(selection)
+        
+        self.position = None
+
+        self.frame = tk.Frame(self)
+
+        self.label = tk.Label(self.frame, text="Project does not fit one plate")
+        self.label.pack() 
+
+        self.label2 = tk.Label(self.frame, text="Please select a position to continue")
+        self.label2.pack()   
+
+        self.label3 = tk.Label(self.frame, textvariable=self.plate_name_var)
+        self.label3.pack()     
+        
+        self.start_combo = ttk.Combobox(self.frame, textvariable=self.start_position_var, values=self.position_list, state='readonly', width=10)
+        self.start_combo.pack()
+
+        self.ok_button = tk.Button(self.frame, text="OK", command=self.onOk)
+        self.ok_button.pack()
+
+        self.cancel_button = tk.Button(self.frame, text="Cancel", command=self.onCancel)
+        self.cancel_button.pack()
+
+        self.frame.pack()
+
+        self.transient(self.parent)
+
+        return
+    
+    def onSelectionChange(self, selection):
+
+        self.setup(selection)   
+
+        return
+
+    def onOk(self):
+        self.position = self.plate.position_from_string(self.start_position_var.get())
+        self.destroy()
+
+    def onCancel(self):
+        self.position = None  ## Give caller None on cancel
+        self.destroy()
+
+
 class ExceptionDialog():
 
     def __init__(self, title='Error', message='', detail=''):
