@@ -164,9 +164,11 @@ class AskPosition(tk.Toplevel):
         if self.selection_pos is None:
             self.start_combo.config(state='disabled')
             self.start_position_var.set('')
+            self.ok_button.config(state='disabled')
         else:
             self.start_combo.config(state='normal')
             self.start_position_var.set(self.selection_pos.label)
+            self.ok_button.config(state='normal')
         # self.start_selection = self.position_list[0] if self.selection_pos is None else self.selection_pos.label
         # self.start_position_var.set(self.start_selection)
 
@@ -196,7 +198,6 @@ class AskPosition(tk.Toplevel):
         
         self.start_combo = ttk.Combobox(self.frame, textvariable=self.start_position_var, values=self.position_list, state='readonly', width=10)
         self.start_combo.pack()
-        self.setup(selection)
 
         self.ok_button = tk.Button(self.frame, text="OK", command=self.onOk)
         self.ok_button.pack()
@@ -205,6 +206,8 @@ class AskPosition(tk.Toplevel):
         self.cancel_button.pack()
 
         self.frame.pack()
+        
+        self.setup(selection)
 
         self.transient(self.parent)
 
