@@ -161,8 +161,14 @@ class AskPosition(tk.Toplevel):
         self.plate_name_var.set(self.plate.name)
         self.position_list = [pos.label for pos in self.plate.getFreeWells()]
         self.selection_pos = selection[1] if selection[1] is not None and selection[1].label in self.position_list else None
-        self.start_selection = self.position_list[0] if self.selection_pos is None else self.selection_pos.label
-        self.start_position_var.set(self.start_selection)
+        if self.selection_pos is None:
+            self.start_combo.config(state='disabled')
+            self.start_position_var.set('')
+        else:
+            self.start_combo.config(state='normal')
+            self.start_position_var.set(self.selection_pos.label)
+        # self.start_selection = self.position_list[0] if self.selection_pos is None else self.selection_pos.label
+        # self.start_position_var.set(self.start_selection)
 
         return
 
@@ -172,7 +178,8 @@ class AskPosition(tk.Toplevel):
 
         self.start_position_var = tk.StringVar(value = "")
         self.plate_name_var = tk.StringVar(value="")
-        self.setup(selection)
+        self.position_list = []
+        
         
         self.position = None
 
@@ -189,6 +196,7 @@ class AskPosition(tk.Toplevel):
         
         self.start_combo = ttk.Combobox(self.frame, textvariable=self.start_position_var, values=self.position_list, state='readonly', width=10)
         self.start_combo.pack()
+        self.setup(selection)
 
         self.ok_button = tk.Button(self.frame, text="OK", command=self.onOk)
         self.ok_button.pack()

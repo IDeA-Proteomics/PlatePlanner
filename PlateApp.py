@@ -101,6 +101,11 @@ class PlateApp(tk.Frame):
         self.resetSelection()
 
         return
+
+    def redrawSamples(self):
+        for p in self.plate_images:
+            p.redrawSamples()
+
     
     @property
     def projects(self):
@@ -377,7 +382,7 @@ class PlateApp(tk.Frame):
                 except NotEnoughWellsException as e:
                     ###  Add what you can to this plate
                     plate.addProject(proj, pos, first_sample=first, last_sample=first + e.avalable - 1)
-                    # self.redrawList()
+                    self.redrawSamples()
                     # self.resetPlates()
                     first = first + e.avalable
                     ###  Pick a new plate or cancel
