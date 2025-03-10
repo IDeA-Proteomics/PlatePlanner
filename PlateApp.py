@@ -2,6 +2,7 @@
 import os
 import PlateImage
 import Popups
+from Worklist import WorkList
 import tkinter as tk
 from tkinter import messagebox, filedialog, Menu
 from idea_utils.PlateExceptions import *
@@ -448,10 +449,15 @@ class PlateApp(tk.Frame):
 
         asker = Popups.AskBcaParams(self, self.projects)
         self.wait_window(asker)
-        print("BCA Setup Output")
-        for n,d in asker.dilutions.items():
-            print(f"{n} {d.get()}")
-    
+        # print("BCA Setup Output")
+        # for n,d in asker.dilutions.items():
+        #     print(f"{n} {d.get()}")
+        wlist = WorkList.buildBCA(self.plates, asker.dilutions)
+
+        for rec in wlist.records:
+            print(rec)
+
+        return    
 
     def exceptionHandler(self, etype, evalue, etrace):
 
