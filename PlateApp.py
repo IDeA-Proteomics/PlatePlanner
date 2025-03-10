@@ -164,6 +164,7 @@ class PlateApp(tk.Frame):
 
         self.setupmenu = Menu(self.menubar, tearoff=0)
         self.setupmenu.add_command(label="Create BCA Plates", command=self.setupmenu_create_bca_plates)
+        self.setupmenu.add_command(label="Build BCA Worklist", command=self.buildBcaWorklist)
 
 
         self.menubar.add_cascade(label="File", menu=self.filemenu)
@@ -269,6 +270,10 @@ class PlateApp(tk.Frame):
 
     def setupmenu_create_bca_plates(self):
         self.createBcaPlates()
+        return
+
+    def setupmenu_build_bca_worklist(self):
+        self.buildBcaWorklist()
         return
 
     
@@ -437,6 +442,15 @@ class PlateApp(tk.Frame):
             rv = (project, asker.plate, asker.position)
 
         return rv
+
+    
+    def buildBcaWorklist(self):
+
+        asker = Popups.AskBcaParams(self, self.projects)
+        self.wait_window(asker)
+        print("BCA Setup Output")
+        for n,d in asker.dilutions.items():
+            print(f"{n} {d.get()}")
     
 
     def exceptionHandler(self, etype, evalue, etrace):

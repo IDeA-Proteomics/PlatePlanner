@@ -225,6 +225,38 @@ class AskPosition(tk.Toplevel):
         self.position = None  ## Give caller None on cancel
         self.destroy()
 
+class AskBcaParams(tk.Toplevel):
+    ###  Pass in list of projects
+    def __init__(self, parent, projects):
+        self.parent = parent
+        tk.Toplevel.__init__(self, self.parent)
+
+        self.dilutions = {p.name:tk.IntVar(value=0) for p in projects}
+
+        self.frame = tk.Frame(self)
+
+        self.label = tk.Label(self.frame, text="Choose Dilution Level for each Project")
+
+        for n,d in self.dilutions.items():
+            f = tk.Frame(self.frame)
+            lab = tk.Label(f, text=n)
+            lab2 = tk.Label(f, text="1:")
+            dil = tk.Entry(f, width=25, textvariable=d)
+            lab.pack(side=tk.LEFT)
+            lab2.pack(side=tk.LEFT)
+            dil.pack(side=tk.LEFT)
+            f.pack(side=tk.TOP)
+
+        self.ok_button = tk.Button(self.frame, text="OK", command=self.onOk)
+        self.ok_button.pack()
+
+        self.frame.pack()
+
+        return
+
+    def onOk(self):
+        self.destroy()
+
 
 class ExceptionDialog():
 
