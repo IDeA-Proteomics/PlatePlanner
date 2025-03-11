@@ -320,23 +320,46 @@ class PlateApp(tk.Frame):
 
         ### Find and verify BCA plate is only plate, popup error if not
         ###  BCA plate should be 8x12 vertical and have first project called Standards with 24 samples
-        if len(self.plates) == 1 and self.plates[0].name == "BCA Plate" and self.plates[0].projects[0].name == "Standards" and self.plates[0].projects[0].sample_count == 24:
-            ### Create 3 4x6 sample plates
-            for i in range(3):
-                self.plates.append(Plate(name=f"Samples{i+1}", rows=4, columns=6, vertical=True))
+        ### Create 3 4x6 sample plates
+        for i in range(3):
+            self.plates.append(Plate(name=f"Samples{i+1}", rows=4, columns=6, vertical=True))
 
-            ### Add projects one by one
-            pidx = 1
-            for proj in self.plates[0].projects:
-                if proj.name == "Standards":
-                    continue
-                while len(self.plates[pidx].getFreeWells()) == 0:
-                    pidx += 1
-                self.addProject(proj, self.plates[pidx], self.plates[pidx].getFreeWells()[0])
+        ### Add projects one by one
+        pidx = 1
+        for proj in self.plates[0].projects:
+            if proj.name == "Standards":
+                continue
+            while len(self.plates[pidx].getFreeWells()) == 0:
+                pidx += 1
+            cproj = Project(name=proj.name, color=proj.color)
+            for s in proj.samples:
+                cproj.addSample(Sample(project=cproj, name=s.name, number=s.number))
+            self.addProject(cproj, self.plates[pidx], self.plates[pidx].getFreeWells()[0])
+       
+        return
+    
+    def buildBcaWorklist(self):
+
+        if len(self.plates) == 1 and self.plates[0].name == "BCA Plate" and self.plates[0].projects[0].name == "Standards" and self.plates[0].projects[0].sample_count == 24:
+
+            self.createBcaSamples()
+
+            ####  DON'T ASK ABOUT STANDARDS
+            asker = Popups.AskBcaParams(self, [p for p in self.projects if p.name != "Standards"])
+            self.wait_window(asker)
+            # print("BCA Setup Output")
+            # for n,d in asker.dilutions.items():
+            #     print(f"{n} {d.get()}")
+            dils = {p:d.get() for p,d in asker.dilutions.items()}
+            wlist = WorkList.buildBCA(self.plates, dils)
+
+            for rec in wlist.records:
+                print(rec)
 
         else:
-            messagebox.showerror("Error", "BCA plate must be the one and only plate")
-        return
+            messagebox.showerror("Error", "BCA plate must be the one and only plate")        
+
+        return  
 
 
     
@@ -480,26 +503,7 @@ class PlateApp(tk.Frame):
             project.color = asker.color
             rv = (project, asker.plate, asker.position)
 
-        return rv
-
-    
-    def buildBcaWorklist(self):
-
-        self.createBcaSamples()
-
-        ####  DON'T ASK ABOUT STANDARDS
-        asker = Popups.AskBcaParams(self, [p for p in self.projects if p.name != "Standards"])
-        self.wait_window(asker)
-        # print("BCA Setup Output")
-        # for n,d in asker.dilutions.items():
-        #     print(f"{n} {d.get()}")
-        dils = {p:d.get() for p,d in asker.dilutions.items()}
-        wlist = WorkList.buildBCA(self.plates, dils)
-
-        for rec in wlist.records:
-            print(rec)
-
-        return    
+        return rv  
 
     def exceptionHandler(self, etype, evalue, etrace):
 

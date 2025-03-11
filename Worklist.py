@@ -76,6 +76,9 @@ class WorkList():
     @classmethod
     def buildBCA(cls, plates, dilutions):
 
+        for s in plates[0].getSamples():
+            print(f"{s.name} - {s.position.label} - {s.position.index}")
+
         retval = WorkList()
 
         
