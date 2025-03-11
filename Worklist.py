@@ -18,6 +18,9 @@ class WorkList():
     def addWashRecord(self):
         self.records.append("W;")
 
+    def addBreakRecord(self):
+        self.records.append("B;")
+
     def addAspirateRecord(self,
         rack_label="",
         rack_id="",
@@ -71,29 +74,73 @@ class WorkList():
 
 
     @classmethod
-    def buildBCA(cls, sample_plates, dilutions):
+    def buildBCA(cls, plates, dilutions):
 
         retval = WorkList()
 
         
         ### Add water to wells
         ####   Select tip and use reagent distribution records to save tips
-        retval.selectTip(10)  ##  200ul tips
-        bca_pos = 25
+
+        dil_amounts = {d for d in dilutions.values()}
+
+        for d in dil_amounts:
+            sam_pos = {s.position.index + 1 for s in plates[0].getSamples() if s.project.name != "Standards" and dilutions[s.project.name] == d}
+            sam_pos = sorted(sam_pos)
+            first = sam_pos[0]
+            last = sam_pos[-1]
+            volume = 100.0 - (100.0 / d)
+            exclude = [i for i in range(first, last) if i not in sam_pos]
+
+            retval.addBreakRecord()
+            retval.selectTip(10)
+
+            retval.addReagentDistribution(src_rack_label="Water", src_rack_type="Trough 100ml", src_start_pos='1', src_end_pos='8', 
+                                          dest_rack_label="BCA Plate", dest_rack_type="Falcon 96 Well Flat Bottom", dest_start_pos=str(first), dest_end_pos=str(last),
+                                          volume=volume, liquid_class="IDeA NODET", diti_reuses='99', exclude=exclude)       
+        
+        retval.addWashRecord()
+        retval.addBreakRecord()
+
+
+        ### Adding sample to wells
+        retval.selectTip(12) ## 50ul tips
+
+        for sample in plates[0].getSamples():
+            if sample.project.name == "Standards":
+                continue
+            volume = 100.0 / dilutions[sample.project.name]
+
+            samp_plate = None
+            samp_pos = None
+            ###  Find sample in sample plates
+            found = False
+            for p in plates[1:]:
+                for s in p.getSamples():
+                    if s.name == sample.name:
+                        samp_plate = p
+                        samp_pos = str(s.position.index + 1)
+                        found = True
+                        break
+                if found:
+                    break
+
+            if samp_plate is not None and samp_pos is not None:
+                asp = {'rack_label':samp_plate.name, 'rack_type':"IDeA 24 Eppendorf Tube", 'position':samp_pos, 'volume':volume, 'liquid_class':"Wet-NODET-50"}
+                disp = {'rack_label':"BCA Plate", 'rack_type':"Falcon 96 Well Flat Bottom", 'position':sample.position.index + 1, 'volume':volume, 'liquid_class':"Wet-NODET-50"}
+                retval.addTransfer(asp, disp)
+
 
         
 
 
-        ### Adding sample to wells
-        bca_pos = 25
-        retval.selectTip(12) ## 50ul tips
-        for plate in sample_plates:
-            for sample in plate.getSamples():
-                vol = 100.0 / dilutions[sample.project.name].get()
-                asp = {'rack_label':plate.name, 'rack_type':"IDeA 24 Eppendorf Tube", 'position':sample.position.index + 1, 'volume':vol, 'liquid_class':"Wet-NODET-50"}
-                disp = {'rack_label':"BCA Plate", 'rack_type':"Falcon 96 Well Flat Bottom", 'position':bca_pos, 'volume':vol, 'liquid_class':"Wet-NODET-50"}
-                retval.addTransfer(asp, disp)
-                bca_pos += 1
+        # for plate in plates:
+        #     for sample in plate.getSamples():
+        #         vol = 100.0 / dilutions[sample.project.name].get()
+        #         asp = {'rack_label':plate.name, 'rack_type':"IDeA 24 Eppendorf Tube", 'position':sample.position.index + 1, 'volume':vol, 'liquid_class':"Wet-NODET-50"}
+        #         disp = {'rack_label':"BCA Plate", 'rack_type':"Falcon 96 Well Flat Bottom", 'position':bca_pos, 'volume':vol, 'liquid_class':"Wet-NODET-50"}
+        #         retval.addTransfer(asp, disp)
+        #         bca_pos += 1
 
         return retval
 

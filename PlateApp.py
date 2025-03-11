@@ -164,7 +164,7 @@ class PlateApp(tk.Frame):
         self.editmenu.add_command(label="Add Project", command=self.editmenu_add_project_from_file) 
 
         self.setupmenu = Menu(self.menubar, tearoff=0)
-        self.setupmenu.add_command(label="Create BCA Plates", command=self.setupmenu_create_bca_plates)
+        self.setupmenu.add_command(label="Create BCA Plate", command=self.setupmenu_create_bca_plate)
         self.setupmenu.add_command(label="Build BCA Worklist", command=self.buildBcaWorklist)
 
 
@@ -269,8 +269,8 @@ class PlateApp(tk.Frame):
             self.onAdd()
         return
 
-    def setupmenu_create_bca_plates(self):
-        self.createBcaPlates()
+    def setupmenu_create_bca_plate(self):
+        self.createBcaPlate()
         return
 
     def setupmenu_build_bca_worklist(self):
@@ -308,15 +308,34 @@ class PlateApp(tk.Frame):
             self.redrawList()
         return
 
-    def createBcaPlates(self):
+    def createBcaPlate(self):
         for plate in self.plates:
             self.removePlate(plate)
-        
-        for i in range(3):
-            self.addPlate(Plate(name=f"Samples{i+1}", rows=4, columns=6, vertical=True))
-        self.resetPlates()
-        self.redrawList()
+        newbca = Plate(name="BCA Plate", rows=8, columns=12, vertical=True)
+        newbca.addProject(Project(name="Standards", color="dim gray", num_samples=24), start_pos=newbca.position_from_index(0))
+        self.addPlate(newbca)
+        return
+    
+    def createBcaSamples(self):
 
+        ### Find and verify BCA plate is only plate, popup error if not
+        ###  BCA plate should be 8x12 vertical and have first project called Standards with 24 samples
+        if len(self.plates) == 1 and self.plates[0].name == "BCA Plate" and self.plates[0].projects[0].name == "Standards" and self.plates[0].projects[0].sample_count == 24:
+            ### Create 3 4x6 sample plates
+            for i in range(3):
+                self.plates.append(Plate(name=f"Samples{i+1}", rows=4, columns=6, vertical=True))
+
+            ### Add projects one by one
+            pidx = 1
+            for proj in self.plates[0].projects:
+                if proj.name == "Standards":
+                    continue
+                while len(self.plates[pidx].getFreeWells()) == 0:
+                    pidx += 1
+                self.addProject(proj, self.plates[pidx], self.plates[pidx].getFreeWells()[0])
+
+        else:
+            messagebox.showerror("Error", "BCA plate must be the one and only plate")
         return
 
 
@@ -373,37 +392,56 @@ class PlateApp(tk.Frame):
             self.onAdd(project)
         return
 
+    def addProject(self, proj, plate, pos):
+        finished = False
+        first = 0
+        while not finished:
+            try:
+                plate.addProject(proj, pos, first_sample=first)
+                finished = True
+            except WellNotFreeException as e:
+                messagebox.showerror("Error", "Project will not fit!\n First occupied well - " + e.message)
+                finished = True
+            except NotEnoughWellsException as e:
+                ###  Add what you can to this plate
+                plate.addProject(proj, pos, first_sample=first, last_sample=first + e.avalable - 1)
+                self.redrawSamples()
+                first = first + e.avalable
+                ###  Pick a new plate or cancel
+
+                next_plate = self.getNextPlate(plate)
+                if next_plate is not None: 
+                    if len(next_plate.getSamples()) == 0:
+                        plate = next_plate
+                        pos = plate.getFreeWells()[0]
+                        continue
+                    else:
+                        self.selected_position = (next_plate, plate.getFreeWells()[0])
+                        asker = Popups.AskPosition(self.root_window, self.selected_position)
+                        self.selectionChangeListeners.append(asker.onSelectionChange)
+                        self.wait_window(asker)
+                        self.selectionChangeListeners.remove(asker.onSelectionChange)
+                
+                        if asker.position is not None:                    
+                        ###  set plate to new plate and run while loop again (set pos to first free well?)
+                            plate = asker.plate
+                            pos = asker.position
+                            continue                    
+                        else:  ### User chose Cancel instead of new position
+                            finished = True
+                else:
+                    messagebox.showerror("Error", "Not enough wells in plate.")
+
+        self.redrawList()
+        self.resetPlates()    
+        
+
+        return
 
     def onAdd(self, project = None):
         proj, plate, pos = self.askNewProject(project)
-        if proj:
-            finished = False
-            first = 0
-            while not finished:
-                try:
-                    plate.addProject(proj, pos, first_sample=first)
-                    finished = True
-                except WellNotFreeException as e:
-                    messagebox.showerror("Error", "Project will not fit!\n First occupied well - " + e.message)
-                except NotEnoughWellsException as e:
-                    ###  Add what you can to this plate
-                    plate.addProject(proj, pos, first_sample=first, last_sample=first + e.avalable - 1)
-                    self.redrawSamples()
-                    first = first + e.avalable
-                    ###  Pick a new plate or cancel
-                    asker = Popups.AskPosition(self.root_window, self.selected_position)
-                    self.selectionChangeListeners.append(asker.onSelectionChange)
-                    self.wait_window(asker)
-                    self.selectionChangeListeners.remove(asker.onSelectionChange)
-                    
-                    if asker.position is not None:                    
-                    ###  set plate to new plate and run while loop again (set pos to first free well?)
-                        plate = asker.plate
-                        pos = asker.position                    
-                    else:  ### User chose Cancel instead of new position
-                        finished = True
-            self.redrawList()
-            self.resetPlates()        
+        if proj:    
+            self.addProject(proj, plate, pos)
         return
     
     def redrawList(self):
@@ -447,12 +485,16 @@ class PlateApp(tk.Frame):
     
     def buildBcaWorklist(self):
 
-        asker = Popups.AskBcaParams(self, self.projects)
+        self.createBcaSamples()
+
+        ####  DON'T ASK ABOUT STANDARDS
+        asker = Popups.AskBcaParams(self, [p for p in self.projects if p.name != "Standards"])
         self.wait_window(asker)
         # print("BCA Setup Output")
         # for n,d in asker.dilutions.items():
         #     print(f"{n} {d.get()}")
-        wlist = WorkList.buildBCA(self.plates, asker.dilutions)
+        dils = {p:d.get() for p,d in asker.dilutions.items()}
+        wlist = WorkList.buildBCA(self.plates, dils)
 
         for rec in wlist.records:
             print(rec)
