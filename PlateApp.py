@@ -415,9 +415,9 @@ class PlateApp(tk.Frame):
             self.onAdd(project)
         return
 
-    def addProject(self, proj, plate, pos):
+    def addProject(self, proj, plate, pos, first_sample=1):
         finished = False
-        first = 0
+        first = first_sample - 1
         while not finished:
             try:
                 plate.addProject(proj, pos, first_sample=first)
@@ -462,9 +462,9 @@ class PlateApp(tk.Frame):
         return
 
     def onAdd(self, project = None):
-        proj, plate, pos = self.askNewProject(project)
+        proj, plate, pos, first = self.askNewProject(project)
         if proj:    
-            self.addProject(proj, plate, pos)
+            self.addProject(proj, plate, pos, first)
         return
     
     def redrawList(self):
@@ -496,12 +496,12 @@ class PlateApp(tk.Frame):
         self.selectionChangeListeners.remove(asker.onSelectionChange)
         if project is None:
             if asker.name and asker.number:
-                rv = (Project(name=asker.name, num_samples=asker.number, color=asker.color), asker.plate, asker.position)
+                rv = (Project(name=asker.name, num_samples=asker.number, color=asker.color), asker.plate, asker.position, asker.first)
             else:
-                rv = (None, None, None)
+                rv = (None, None, None, None)
         else:
             project.color = asker.color
-            rv = (project, asker.plate, asker.position)
+            rv = (project, asker.plate, asker.position, asker.first)
 
         return rv  
 

@@ -115,6 +115,14 @@ class AskNewProject(tk.Toplevel):
         self.number_entry = LabeledEntry(self.frame, text="Number", state='normal' if project is None else 'disabled')
         self.number_entry.set(0 if project is None else project.sample_count)
         self.number_entry.pack()
+
+        self.first_entry = LabeledEntry(self.frame, text="First", state='disabled' if project is None else 'normal')
+        self.first_entry.set("" if project is None else '1')
+        self.first_entry.pack()
+
+        self.last_entry = LabeledEntry(self.frame, text="Last", state='disabled' if project is None else 'normal')
+        self.last_entry.set("" if project is None else project.sample_count)
+        self.last_entry.pack()
         
         
         self.start_combo = ttk.Combobox(self.frame, textvariable=self.start_position_var, values=self.position_list, state='readonly', width=10)
@@ -147,6 +155,10 @@ class AskNewProject(tk.Toplevel):
         self.name = self.name_entry.get()
         num = self.number_entry.get()
         self.number = int(num) if num.isnumeric() else 0
+        fi = self.first_entry.get()
+        self.first = int(fi) if fi.isnumeric() else 1
+        la = self.last_entry.get()
+        self.last = int(la) if la.isnumeric() else None
         #and int(num) < self.plate.number_of_wells else 0
         self.position = self.plate.position_from_string(self.start_position_var.get())
         self.color = self.color_var.get()
