@@ -71,6 +71,14 @@ class WorkList():
 
         self.records.append(f"R;{src_rack_label};{src_rack_id};{src_rack_type};{src_start_pos};{src_end_pos};{dest_rack_label};{dest_rack_id};{dest_rack_type};{dest_start_pos};{dest_end_pos};{volume};{liquid_class};{diti_reuses};{multi_disp};{direction};{";".join(str(e) for e in exclude)}")
 
+    def saveToFile(self, filename):
+        if filename:
+            with open(filename, 'w', newline='') as file:
+                for rec in self.records:
+                    file.write(rec)
+                    file.write('\n')
+        return
+
 
 
     @classmethod

@@ -354,8 +354,11 @@ class PlateApp(tk.Frame):
             dils = {p:d.get() for p,d in asker.dilutions.items()}
             wlist = WorkList.buildBCA(self.plates, dils)
 
-            for rec in wlist.records:
-                print(rec)
+            # for rec in wlist.records:
+            #     print(rec)
+            filename = filedialog.asksaveasfilename(parent=self.root_window, title="Save Worklist File", defaultextension='.gwl', filetypes=(("Worklist", "*.gwl"),("All Files", "*.*")))
+            if filename:
+                wlist.saveToFile(filename)
 
         else:
             messagebox.showerror("Error", "BCA plate must be the one and only plate")        
