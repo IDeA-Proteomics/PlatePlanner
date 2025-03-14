@@ -333,7 +333,8 @@ class PlateApp(tk.Frame):
                 pidx += 1
             cproj = Project(name=proj.name, color=proj.color)
             for s in proj.samples:
-                cproj.addSample(Sample(project=cproj, name=s.name, number=s.number))
+                if s in self.plates[0].getSamples():
+                    cproj.addSample(Sample(project=cproj, name=s.name, number=s.number))
             self.addProject(cproj, self.plates[pidx], self.plates[pidx].getFreeWells()[0])
        
         return
@@ -418,7 +419,7 @@ class PlateApp(tk.Frame):
     def addProject(self, proj, plate, pos, first_sample=1, last_sample=None):
         finished = False
         first = first_sample - 1
-        last = last_sample - 1
+        last = last_sample - 1 if last_sample is not None else None
         while not finished:
             try:
                 plate.addProject(proj, pos, first_sample=first, last_sample=last)
