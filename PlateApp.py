@@ -415,12 +415,13 @@ class PlateApp(tk.Frame):
             self.onAdd(project)
         return
 
-    def addProject(self, proj, plate, pos, first_sample=1):
+    def addProject(self, proj, plate, pos, first_sample=1, last_sample=None):
         finished = False
         first = first_sample - 1
+        last = last_sample - 1
         while not finished:
             try:
-                plate.addProject(proj, pos, first_sample=first)
+                plate.addProject(proj, pos, first_sample=first, last_sample=last)
                 finished = True
             except WellNotFreeException as e:
                 messagebox.showerror("Error", "Project will not fit!\n First occupied well - " + e.message)
@@ -462,9 +463,9 @@ class PlateApp(tk.Frame):
         return
 
     def onAdd(self, project = None):
-        proj, plate, pos, first = self.askNewProject(project)
+        proj, plate, pos, first, last = self.askNewProject(project)
         if proj:    
-            self.addProject(proj, plate, pos, first)
+            self.addProject(proj, plate, pos, first, last)
         return
     
     def redrawList(self):
@@ -496,12 +497,12 @@ class PlateApp(tk.Frame):
         self.selectionChangeListeners.remove(asker.onSelectionChange)
         if project is None:
             if asker.name and asker.number:
-                rv = (Project(name=asker.name, num_samples=asker.number, color=asker.color), asker.plate, asker.position, asker.first)
+                rv = (Project(name=asker.name, num_samples=asker.number, color=asker.color), asker.plate, asker.position, asker.first, asker.last)
             else:
-                rv = (None, None, None, None)
+                rv = (None, None, None, None, None)
         else:
             project.color = asker.color
-            rv = (project, asker.plate, asker.position, asker.first)
+            rv = (project, asker.plate, asker.position, asker.first, asker.last)
 
         return rv  
 
