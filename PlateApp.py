@@ -294,8 +294,9 @@ class PlateApp(tk.Frame):
     def removeSample(self, plate, position):
         if position and plate[position] is not None:
             plate.removeSample(plate[position])
-            self.resetPlates()
+            # self.resetPlates()
             self.redrawList()
+            self.redrawSamples()
         return
     
     def removeProject(self, plate, position):
@@ -304,8 +305,9 @@ class PlateApp(tk.Frame):
             if proj is not None:
                 for p in self.plates:
                     p.removeProject(proj)
-            self.resetPlates()
+            # self.resetPlates()
             self.redrawList()
+            self.redrawSamples()
         return
 
     def createBcaPlate(self):
@@ -346,7 +348,7 @@ class PlateApp(tk.Frame):
             self.createBcaSamples()
 
             ####  DON'T ASK ABOUT STANDARDS
-            asker = Popups.AskBcaParams(self, [p for p in self.projects if p.name != "Standards"])
+            asker = Popups.AskBcaParams(self, [p for p in self.plates[0].projects if p.name != "Standards"])
             self.wait_window(asker)
             # print("BCA Setup Output")
             # for n,d in asker.dilutions.items():
