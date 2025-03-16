@@ -172,6 +172,7 @@ class PlateApp(tk.Frame):
         self.editmenu.add_command(label="Add Project", command=self.editmenu_add_project_from_file) 
 
         self.setupmenu = Menu(self.menubar, tearoff=0)
+        self.setupmenu.add_command(label="Create SepPak", command=self.setupmenu_build_sep_pak)
         self.setupmenu.add_command(label="Create BCA Plate", command=self.setupmenu_create_bca_plate)
         self.setupmenu.add_command(label="Build BCA Worklist", command=self.buildBcaWorklist)
 
@@ -289,6 +290,12 @@ class PlateApp(tk.Frame):
     def setupmenu_build_bca_worklist(self):
         self.buildBcaWorklist()
         return
+    
+    def setupmenu_build_sep_pak(self):
+        filename = filedialog.askopenfilename(parent=self.root_window, title="Open Plate File", filetypes=(("plate", "*.plate"),("All Files", "*.*")))
+        if filename:
+            self.createSepPakPlate(filename)
+        return
 
     
     def addPlate(self, plate):
@@ -337,7 +344,7 @@ class PlateApp(tk.Frame):
     
 
     def createBcaPlate(self):
-        for plate in self.plates:
+        for plate in self.plates[::-1]:
             self.removePlate(plate)
         newbca = Plate(name="BCA Plate", rows=8, columns=12, vertical=True)
         newbca.addProject(Project(name="Standards", color="dim gray", num_samples=24), start_pos=newbca.position_from_index(0))
@@ -394,11 +401,31 @@ class PlateApp(tk.Frame):
         return  
     
 
-    def createSepPakPlate(self):
+    def createSepPakPlate(self, filename=None):
+        if filename is not None:
+            sample_plates = Plate.loadFromFile(filename)
+        else:
+            sample_plates = [plate for plate in self.plates]
 
-        pass
+        if len([s for plate in sample_plates for s in plate.getSamples()]) > 96:
+            messagebox.showerror("Error", "Max of 96 samples for Sep Pak")
+            return
+        
+        
+        sample_projects = {project for plate in sample_plates for project in plate.projects}
+        sp_plate = Plate(name="SepPak", rows=8, columns=12, vertical=True)
+        
+        for plate in self.plates[::-1]:
+            self.removePlate(plate)
+        self.addPlate(sp_plate)    
 
+        for proj in sample_projects:
+            self.onAdd(proj)
+        
+        # for plate in sample_plates:
+        #     self.addPlate(plate)
 
+        return
 
     
     def onSave(self, filename):
