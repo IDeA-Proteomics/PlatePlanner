@@ -61,11 +61,14 @@ class PlateApp(tk.Frame):
 
         self.createMenu()
 
+        
+
         ### if initialized with file name, open that file
         if self._current_file is not None:
             self.loadFromFile(self._current_file)
 
         return
+
     
     @property
     def current_file(self):
@@ -116,6 +119,10 @@ class PlateApp(tk.Frame):
     def plate_count(self):
         return len(self.plates)
     
+    @property
+    def sample_count(self):
+        return len([s for p in self.plates for s in p.getSamples()])
+    
     def getImage(self, plate):
         for i, p in enumerate(self.plates):
             if p is plate:
@@ -125,12 +132,12 @@ class PlateApp(tk.Frame):
     def getNextPlate(self, plate):
         for i, p in enumerate(self.plates):
             if p is plate:
-                if len(self.plates) > i+1:
+                if self.plate_count > i+1:
                     return self.plates[i+1]
         return None
     
     def resetSelection(self):
-        if len(self.plates) > 0:
+        if self.plate_count > 0:
             self.selected_position = (self.plates[0], None)
         else:
             self.selected_position = (None, None)
@@ -160,6 +167,7 @@ class PlateApp(tk.Frame):
         self.editmenu.add_command(label="Add From File", command=self.editmenu_add_from_file) 
         self.editmenu.add_command(label="Remove Plate", command=self.editmenu_remove_plate) 
         self.editmenu.add_command(label="Remove Project", command=self.editmenu_remove_project) 
+        self.editmenu.add_command(label="Move Project", command=self.editmenu_move_project) 
         self.editmenu.add_command(label="Remove Sample", command=self.editmenu_remove_sample) 
         self.editmenu.add_command(label="Add Project", command=self.editmenu_add_project_from_file) 
 
@@ -176,6 +184,7 @@ class PlateApp(tk.Frame):
         self.plate_context_menu = Menu(self.root_window, tearoff=0)
         self.plate_context_menu.add_command(label="Add Project", command=self.editmenu_add_project_from_file) 
         self.plate_context_menu.add_command(label="Remove Project", command=self.editmenu_remove_project) 
+        self.plate_context_menu.add_command(label="Move Project", command=self.editmenu_move_project)
         self.plate_context_menu.add_command(label="Remove Sample", command=self.editmenu_remove_sample) 
 
         self.root_window.config(menu=self.menubar)
@@ -244,7 +253,7 @@ class PlateApp(tk.Frame):
         return
     
     def editmenu_remove_plate(self):
-        if len(self.plates)>1:
+        if self.plate_count>1:
             if self.selected_position[1] is None:
                 messagebox.showinfo("Info", "Please Select a Well First")        
             else:
@@ -259,6 +268,10 @@ class PlateApp(tk.Frame):
     
     def editmenu_remove_project(self):
         self.removeProject(self.selected_position[0], self.selected_position[1])
+        return    
+    
+    def editmenu_move_project(self):
+        self.moveProject(self.selected_position[0], self.selected_position[1])
         return    
 
     def editmenu_add_project_from_file(self):
@@ -309,6 +322,19 @@ class PlateApp(tk.Frame):
             self.redrawList()
             self.redrawSamples()
         return
+    
+    def moveProject(self, plate, position):
+        if position and plate[position] is not None:
+            proj = plate[position].project
+            if proj is not None:
+                for p in self.plates:
+                    p.removeProject(proj)
+            self.redrawSamples()
+            self.onAdd(proj)
+            self.redrawList()
+            self.redrawSamples()
+        return
+    
 
     def createBcaPlate(self):
         for plate in self.plates:
@@ -343,7 +369,7 @@ class PlateApp(tk.Frame):
     
     def buildBcaWorklist(self):
 
-        if len(self.plates) == 1 and self.plates[0].name == "BCA Plate" and self.plates[0].projects[0].name == "Standards" and self.plates[0].projects[0].sample_count == 24:
+        if self.plate_count == 1 and self.plates[0].name == "BCA Plate" and self.plates[0].projects[0].name == "Standards" and self.plates[0].projects[0].sample_count == 24:
 
             self.createBcaSamples()
 
@@ -366,6 +392,12 @@ class PlateApp(tk.Frame):
             messagebox.showerror("Error", "BCA plate must be the one and only plate")        
 
         return  
+    
+
+    def createSepPakPlate(self):
+
+        pass
+
 
 
     
@@ -410,8 +442,19 @@ class PlateApp(tk.Frame):
         return
     
     def onWellRightClick(self, plate, position, event):
-        self.selected_position = (plate, position)
+        if self.selected_position != (plate, position):
+            if self.selected_position[1] is not None:
+                self.getImage(self.selected_position[0]).wells[self.selected_position[1].index].select(False)
+            self.selected_position = (plate, position)
+            self.getImage(self.selected_position[0]).wells[self.selected_position[1].index].select(True)
+            self.redrawSamples()
         self.plate_context_menu.post(event.x_root, event.y_root)
+        self.bindID = self.root_window.bind("<Button-1>", self.hideContextMenu)
+        return
+    
+    def hideContextMenu(self, event):
+        self.plate_context_menu.unpost()
+        self.root_window.unbind("<Button-1>", self.bindID)
         return
 
     def addProjectFromFile(self, filename):
@@ -477,6 +520,8 @@ class PlateApp(tk.Frame):
     def redrawList(self):
         for widget in self.proj_list_frame.winfo_children():
             widget.destroy()
+        t_label = tk.Label(self.proj_list_frame, text=f"Total Samples :{self.sample_count}")
+        t_label.pack(side=tk.TOP)
         for plate in self.plates:
             p_label = tk.Label(self.proj_list_frame, text=plate.name)
             p_label.pack(side=tk.TOP)
