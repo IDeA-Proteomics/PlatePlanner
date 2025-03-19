@@ -65,8 +65,8 @@ class WorkList():
         volume="",
         liquid_class="",
         diti_reuses="",
-        multi_disp="",
-        direction="",
+        multi_disp="1",
+        direction="0",
         exclude=[]):
 
         self.records.append(f"R;{src_rack_label};{src_rack_id};{src_rack_type};{src_start_pos};{src_end_pos};{dest_rack_label};{dest_rack_id};{dest_rack_type};{dest_start_pos};{dest_end_pos};{volume};{liquid_class};{diti_reuses};{multi_disp};{direction};{';'.join(str(e) for e in exclude)}")
@@ -84,8 +84,8 @@ class WorkList():
     @classmethod
     def buildBCA(cls, plates, dilutions):
 
-        for s in plates[0].getSamples():
-            print(f"{s.name} - {s.position.label} - {s.position.index}")
+        # for s in plates[0].getSamples():
+        #     print(f"{s.name} - {s.position.label} - {s.position.index}")
 
         retval = WorkList()
 
@@ -147,7 +147,7 @@ class WorkList():
         first = rpos[0]
         last = rpos[-1]
         volume = 100.0
-        exclude = [i for i in range(first, last) if i in range(17,25) or i not in rpos]
+        exclude = [i for i in range(first, last) if i in range(17,24) or i not in rpos]
         retval.addBreakRecord()
         retval.selectTip(10)
 
@@ -155,9 +155,9 @@ class WorkList():
         ###  Change the rack label and type to whatever we put reagent in.  
         ###  Create a liquid class that includes mixing or add mixing steps. 
 
-        retval.addReagentDistribution(src_rack_label="Water", src_rack_type="Trough 100ml", src_start_pos='1', src_end_pos='8', 
+        retval.addReagentDistribution(src_rack_label="BCA Reagent", src_rack_type="Trough 25ml Max. Recovery", src_start_pos='1', src_end_pos='8', 
                                         dest_rack_label="BCA Plate", dest_rack_type="Falcon 96 Well Flat Bottom", dest_start_pos=str(first), dest_end_pos=str(last),
-                                        volume=volume, liquid_class="IDeA NODET", diti_reuses='99', exclude=exclude)  
+                                        volume=volume, liquid_class="BCA Reagent Mix", diti_reuses='1', exclude=exclude)  
         
         retval.addWashRecord()
         retval.addBreakRecord()
