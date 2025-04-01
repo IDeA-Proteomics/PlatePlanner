@@ -96,7 +96,8 @@ class WorkList():
         dil_amounts = {d for d in dilutions.values()}
 
         for d in dil_amounts:
-            sam_pos = {s.position.index + 1 for s in plates[0].getSamples() if s.project.name != "Standards" and dilutions[s.project.name] == d}
+            # sam_pos = {s.position.index + 1 for s in plates[0].getSamples() if s.project.name != "Standards" and dilutions[s.project.name] == d}
+            sam_pos = {p for p in plates[0].positions if plates[0][p].project.name != "Standards" and dilutions[plates[0][p].project.name] == d}
             sam_pos = sorted(sam_pos)
             first = sam_pos[0]
             last = sam_pos[-1]

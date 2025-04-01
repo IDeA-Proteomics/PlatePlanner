@@ -160,7 +160,8 @@ class AskNewProject(tk.Toplevel):
         la = self.last_entry.get()
         self.last = int(la) if la.isnumeric() else None
         #and int(num) < self.plate.number_of_wells else 0
-        self.position = self.plate.position_from_string(self.start_position_var.get())
+        self.position = Position.from_string(self.plate, self.start_position_var.get())
+        # self.position = self.plate.position_from_string(self.start_position_var.get())
         self.color = self.color_var.get()
         self.destroy()
 
@@ -230,7 +231,7 @@ class AskPosition(tk.Toplevel):
         return
 
     def onOk(self):
-        self.position = self.plate.position_from_string(self.start_position_var.get())
+        self.position = Position.from_string(self.plate, self.start_position_var.get())
         self.destroy()
 
     def onCancel(self):
